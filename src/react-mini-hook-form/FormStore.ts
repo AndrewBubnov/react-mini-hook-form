@@ -2,10 +2,12 @@ import { FormState, ResetValues, Subscribers } from './types.ts';
 
 export class FormStore {
 	subscribers: Subscribers;
+	base: FormState;
 	proxy: FormState;
 
 	constructor() {
 		this.subscribers = {};
+		this.base = {};
 		this.proxy = this.createProxy({});
 	}
 
@@ -40,11 +42,12 @@ export class FormStore {
 	}
 
 	getKeys() {
-		return Object.keys(this.proxy);
+		return Object.keys(this.base);
 	}
 
 	addField(key: string) {
-		this.proxy = this.createProxy({ ...this.proxy, [key]: this.proxy[key] || '' });
+		if (key in this.base) return;
+		this.base[key] = '';
 	}
 
 	updateField = (fieldName: string, fieldValue: string) => {
