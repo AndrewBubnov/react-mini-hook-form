@@ -9,7 +9,7 @@ function App() {
 		formState: { errors },
 	} = useForm();
 
-	console.log(watch());
+	console.log(watch('title'));
 
 	return (
 		<form

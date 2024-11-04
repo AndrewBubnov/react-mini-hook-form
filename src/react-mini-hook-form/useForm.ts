@@ -7,15 +7,15 @@ export const useForm = () => {
 	const formStore = useMemo(() => new FormStore(), []);
 
 	const [watchedFormValue, setWatchedFormValue] = useState<FormState>(formStore.getFormState());
-	const [fieldNameList, setFieldNameList] = useState<string[]>([]);
 
 	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
+	const fieldNameListRef = useRef<string[]>([]);
 
 	const { trigger, errors, setFieldValidationMap, fieldValidationMap } = useValidation(formStore.proxy);
 
 	useEffect(() => {
 		const unsubscribeList: (() => void)[] = [];
-		fieldNameList.forEach(fieldName => {
+		fieldNameListRef.current.forEach(fieldName => {
 			const unsubscribe = formStore.subscribe(fieldName, newValue => {
 				setWatchedFormValue(prevState => ({ ...prevState, [fieldName]: newValue }));
 			});
@@ -23,18 +23,21 @@ export const useForm = () => {
 		});
 
 		return () => unsubscribeList.forEach(unsubscribe => unsubscribe());
-	}, [fieldNameList, formStore]);
+	}, [formStore]);
 
 	const watch = useCallback(
 		(key?: string) => {
-			if (key && !fieldNameList.length) {
-				setFieldNameList([key]);
-			} else if (!fieldNameList.length) {
-				setFieldNameList(formStore.getKeys());
+			const updatedSet = new Set(fieldNameListRef.current);
+			if (key) {
+				updatedSet.add(key);
+			} else {
+				formStore.getKeys().forEach(field => updatedSet.add(field));
 			}
+			fieldNameListRef.current = Array.from(updatedSet);
+
 			return key ? watchedFormValue[key] ?? '' : watchedFormValue;
 		},
-		[fieldNameList.length, formStore, watchedFormValue]
+		[formStore, watchedFormValue]
 	);
 
 	const register = useCallback(
