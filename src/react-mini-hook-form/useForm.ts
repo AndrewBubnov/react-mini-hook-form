@@ -1,44 +1,17 @@
-import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useMemo, useRef } from 'react';
 import { FormStore } from './FormStore.ts';
 import { FieldValidationOptions, FormState, ResetValues } from './types.ts';
 import { useValidation } from './useValidation.ts';
+import { useWatch } from './useWatch.ts';
 
 export const useForm = () => {
 	const formStore = useMemo(() => new FormStore(), []);
 
-	const [watchedFormValue, setWatchedFormValue] = useState<FormState>(formStore.getFormState());
-
 	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
-	const fieldNameListRef = useRef<string[]>([]);
+
+	const { watch, setWatchedFormValue } = useWatch(formStore);
 
 	const { trigger, errors, setFieldValidationMap, fieldValidationMap } = useValidation(formStore.proxy);
-
-	useEffect(() => {
-		const unsubscribeList: (() => void)[] = [];
-		fieldNameListRef.current.forEach(fieldName => {
-			const unsubscribe = formStore.subscribe(fieldName, newValue => {
-				setWatchedFormValue(prevState => ({ ...prevState, [fieldName]: newValue }));
-			});
-			unsubscribeList.push(unsubscribe);
-		});
-
-		return () => unsubscribeList.forEach(unsubscribe => unsubscribe());
-	}, [formStore]);
-
-	const watch = useCallback(
-		(key?: string) => {
-			const updatedSet = new Set(fieldNameListRef.current);
-			if (key) {
-				updatedSet.add(key);
-			} else {
-				formStore.getKeys().forEach(field => updatedSet.add(field));
-			}
-			fieldNameListRef.current = Array.from(updatedSet);
-
-			return key ? watchedFormValue[key] ?? '' : watchedFormValue;
-		},
-		[formStore, watchedFormValue]
-	);
 
 	const register = useCallback(
 		(fieldName: string, validationOptions?: FieldValidationOptions) => {
@@ -69,7 +42,7 @@ export const useForm = () => {
 			formStore.reset(resetValues);
 			setWatchedFormValue(formStore.getFormState());
 		},
-		[formStore]
+		[formStore, setWatchedFormValue]
 	);
 
 	const handleSubmit = useCallback(
