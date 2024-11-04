@@ -77,7 +77,7 @@ export const useForm = () => {
 			} else if (!fieldNameList.length) {
 				setFieldNameList(formStore.getKeys());
 			}
-			return key ? formValue[key] : formValue;
+			return key ? formValue[key] ?? '' : formValue;
 		},
 		[fieldNameList.length, formStore, formValue]
 	);
