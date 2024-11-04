@@ -51,6 +51,7 @@ export class FormStore {
 		this.proxy[fieldName] = evt.target.value;
 	};
 }
+
 export const useForm = () => {
 	const formStore = useMemo(() => new FormStore(), []);
 
@@ -83,8 +84,8 @@ export const useForm = () => {
 
 	const register = useCallback(
 		(fieldName: string) => {
+			formStore.addField(fieldName);
 			return {
-				onFocus: () => formStore.addField(fieldName),
 				onChange: (evt: ChangeEvent<HTMLInputElement>) => formStore.onChange(evt, fieldName),
 			};
 		},

@@ -2,7 +2,7 @@ import { useForm } from './react-mini-hook-form/FormState.ts';
 
 function App() {
 	const { watch, register } = useForm();
-	console.log(watch('body'));
+	console.log(watch('title'));
 
 	return (
 		<form style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}>
