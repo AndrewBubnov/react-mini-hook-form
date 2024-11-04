@@ -1,8 +1,8 @@
 import { useForm } from './react-mini-hook-form/useForm.ts';
 
 function App() {
-	const { register, handleSubmit } = useForm();
-
+	const { register, handleSubmit, watch } = useForm();
+	console.log(watch());
 	return (
 		<form
 			style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}

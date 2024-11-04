@@ -1,10 +1,11 @@
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormStore } from './FormStore.ts';
+import { FormState } from './types.ts';
 
 export const useForm = () => {
 	const formStore = useMemo(() => new FormStore(), []);
 
-	const [formValue, setFormValue] = useState<Record<string, string>>(formStore.getValue());
+	const [formValue, setFormValue] = useState<FormState>(formStore.getFormState());
 	const [fieldNameList, setFieldNameList] = useState<string[]>([]);
 
 	useEffect(() => {
@@ -35,16 +36,16 @@ export const useForm = () => {
 		(fieldName: string) => {
 			formStore.addField(fieldName);
 			return {
-				onChange: (evt: ChangeEvent<HTMLInputElement>) => formStore.onChange(evt, fieldName),
+				onChange: (evt: ChangeEvent<HTMLInputElement>) => formStore.updateField(fieldName, evt.target.value),
 			};
 		},
 		[formStore]
 	);
 
 	const handleSubmit = useCallback(
-		(submitHandler: (arg: typeof formStore.proxy) => void) => (evt: FormEvent) => {
+		(submitHandler: (arg: FormState) => void) => (evt: FormEvent) => {
 			evt.preventDefault();
-			submitHandler(formStore.getValue());
+			submitHandler(formStore.getFormState());
 		},
 		[formStore]
 	);

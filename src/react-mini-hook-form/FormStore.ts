@@ -1,8 +1,8 @@
-import { ChangeEvent } from 'react';
+import { FormState, Subscribers } from './types.ts';
 
 export class FormStore {
-	subscribers: Record<string, ((arg: string) => void)[]>;
-	proxy;
+	subscribers: Subscribers;
+	proxy: FormState;
 
 	constructor() {
 		this.subscribers = {};
@@ -11,7 +11,7 @@ export class FormStore {
 
 	createProxy(base: Record<string, string>) {
 		const handler = {
-			set: (target: Record<string, string>, property: string, value: string) => {
+			set: (target: FormState, property: string, value: string) => {
 				target[property] = value;
 
 				if (this.subscribers[property]) {
@@ -20,7 +20,7 @@ export class FormStore {
 
 				return true;
 			},
-			get: (target: Record<string, string>, prop: string) => target[prop],
+			get: (target: FormState, prop: string) => target[prop],
 		};
 
 		return new Proxy(base, handler);
@@ -35,8 +35,8 @@ export class FormStore {
 		};
 	}
 
-	getValue(key?: string) {
-		return key ? this.proxy[key] : JSON.parse(JSON.stringify(this.proxy));
+	getFormState() {
+		return Object.assign({}, this.proxy);
 	}
 
 	getKeys() {
@@ -47,7 +47,7 @@ export class FormStore {
 		this.proxy = this.createProxy({ ...this.proxy, [key]: this.proxy[key] || '' });
 	}
 
-	onChange = (evt: ChangeEvent<HTMLInputElement>, fieldName: string) => {
-		this.proxy[fieldName] = evt.target.value;
+	updateField = (fieldName: string, fieldValue: string) => {
+		this.proxy[fieldName] = fieldValue;
 	};
 }
