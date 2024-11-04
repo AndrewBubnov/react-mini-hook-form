@@ -83,12 +83,8 @@ export const useForm = () => {
 
 	const register = useCallback(
 		(fieldName: string) => {
-			const addField = (fieldName: string) => () => {
-				formStore.addField(fieldName);
-				setFieldNameList(prevState => [...prevState, fieldName]);
-			};
 			return {
-				onFocus: addField(fieldName),
+				onFocus: () => formStore.addField(fieldName),
 				onChange: (evt: ChangeEvent<HTMLInputElement>) => formStore.onChange(evt, fieldName),
 			};
 		},
