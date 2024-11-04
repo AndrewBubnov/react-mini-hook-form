@@ -1,8 +1,12 @@
 import { useForm } from './react-mini-hook-form/useForm.ts';
 
 function App() {
-	const { register, handleSubmit, watch } = useForm();
-	console.log(watch());
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm();
+
 	return (
 		<form
 			style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}
@@ -15,8 +19,13 @@ function App() {
 					name="title"
 					placeholder="Update title..."
 					style={{ width: '100%', height: 40 }}
-					{...register('title')}
+					{...register('title', { required: true, min: 3 })}
 				/>
+				{errors.title && (
+					<p role="alert" style={{ color: 'red' }}>
+						{errors.title?.message}
+					</p>
+				)}
 			</label>
 			<label style={{ fontWeight: 600 }}>
 				Body
@@ -25,8 +34,13 @@ function App() {
 					name="body"
 					placeholder="Update body..."
 					style={{ width: '100%', height: 40 }}
-					{...register('body')}
+					{...register('body', { required: 'Body is required', max: 5 })}
 				/>
+				{errors.body && (
+					<p role="alert" style={{ color: 'red' }}>
+						{errors.body?.message}
+					</p>
+				)}
 			</label>
 			<button type="submit">Submit</button>
 		</form>
