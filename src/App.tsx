@@ -1,12 +1,13 @@
-import { useForm } from './react-mini-hook-form/FormState.ts';
+import { useForm } from './react-mini-hook-form/useForm.ts';
 
 function App() {
-	const { watch, register } = useForm();
-	const title = watch('title');
-	console.log(title);
+	const { register, handleSubmit } = useForm();
 
 	return (
-		<form style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}>
+		<form
+			style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}
+			onSubmit={handleSubmit(console.log)}
+		>
 			<label style={{ fontWeight: 600 }}>
 				Title
 				<input
@@ -27,6 +28,7 @@ function App() {
 					{...register('body')}
 				/>
 			</label>
+			<button type="submit">Submit</button>
 		</form>
 	);
 }
