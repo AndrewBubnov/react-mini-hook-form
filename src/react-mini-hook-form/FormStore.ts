@@ -1,4 +1,4 @@
-import { FormState, Subscribers } from './types.ts';
+import { FormState, ResetValues, Subscribers } from './types.ts';
 
 export class FormStore {
 	subscribers: Subscribers;
@@ -50,4 +50,14 @@ export class FormStore {
 	updateField = (fieldName: string, fieldValue: string) => {
 		this.proxy[fieldName] = fieldValue;
 	};
+
+	reset(resetValues: ResetValues) {
+		const resetKeys = resetValues ? Object.keys(resetValues) : this.getKeys();
+		this.proxy = this.createProxy(
+			resetKeys.reduce((acc, cur) => {
+				acc[cur] = resetValues?.[cur] || '';
+				return acc;
+			}, {} as FormState)
+		);
+	}
 }

@@ -15,3 +15,5 @@ export type FieldValidationOptions = Partial<{
 }>;
 
 export type Errors = Record<string, Record<'message', string>>;
+
+export type ResetValues = Record<string, string> | undefined;

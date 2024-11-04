@@ -1,6 +1,6 @@
-import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormStore } from './FormStore.ts';
-import { Errors, FieldValidationOptions, FormState, ValidationRules } from './types.ts';
+import { Errors, FieldValidationOptions, FormState, ResetValues, ValidationRules } from './types.ts';
 import { REQUIRED_FIELD_DEFAULT_MESSAGE } from './constants.ts';
 
 export const useForm = () => {
@@ -10,6 +10,8 @@ export const useForm = () => {
 	const [fieldNameList, setFieldNameList] = useState<string[]>([]);
 	const [fieldValidationMap, setFieldValidationMap] = useState<Record<string, FieldValidationOptions>>({});
 	const [errors, setErrors] = useState<Errors>({});
+
+	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
 
 	useEffect(() => {
 		const unsubscribeList: (() => void)[] = [];
@@ -43,6 +45,9 @@ export const useForm = () => {
 			}
 			return {
 				onChange: (evt: ChangeEvent<HTMLInputElement>) => formStore.updateField(fieldName, evt.target.value),
+				ref: (element: HTMLInputElement | null) => {
+					if (element) fieldsRefMap.current[fieldName] = element;
+				},
 			};
 		},
 		[fieldValidationMap, formStore]
@@ -77,6 +82,22 @@ export const useForm = () => {
 		return errors;
 	}, [fieldValidationMap, formStore.proxy]);
 
+	const reset = useCallback(
+		(resetValues: ResetValues) => {
+			const resetKeys = resetValues ? Object.keys(resetValues) : formStore.getKeys();
+
+			resetKeys.forEach(name => {
+				const field = fieldsRefMap.current[name];
+				if (field) {
+					field.value = resetValues?.[name] || '';
+				}
+			});
+			formStore.reset(resetValues);
+			setWatchedFormValue(formStore.getFormState());
+		},
+		[formStore]
+	);
+
 	const handleSubmit = useCallback(
 		(submitHandler: (arg: FormState) => void) => async (evt: FormEvent) => {
 			evt.preventDefault();
@@ -86,5 +107,5 @@ export const useForm = () => {
 		[formStore, trigger]
 	);
 
-	return { watch, register, handleSubmit, trigger, formState: { errors } };
+	return { watch, register, handleSubmit, trigger, reset, formState: { errors } };
 };

@@ -4,8 +4,12 @@ function App() {
 	const {
 		register,
 		handleSubmit,
+		reset,
+		watch,
 		formState: { errors },
 	} = useForm();
+
+	console.log(watch());
 
 	return (
 		<form
@@ -42,6 +46,9 @@ function App() {
 					</p>
 				)}
 			</label>
+			<button type="button" onClick={() => reset({ title: 'title', body: 'Body' })}>
+				Reset
+			</button>
 			<button type="submit">Submit</button>
 		</form>
 	);
