@@ -34,7 +34,7 @@ export const useForm = () => {
 			formStore.addField(fieldName);
 			return {
 				field: {
-					value: formStore.proxy[fieldName],
+					value: formStore.proxy[fieldName] || '',
 					onChange: (evt: ChangeEvent<HTMLInputElement>) =>
 						formStore.updateField(fieldName, evt.target.value),
 				},
