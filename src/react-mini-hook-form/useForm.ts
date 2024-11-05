@@ -29,6 +29,20 @@ export const useForm = () => {
 		[fieldValidationMap, formStore, setFieldValidationMap]
 	);
 
+	const control = useCallback(
+		(fieldName: string) => {
+			formStore.addField(fieldName);
+			return {
+				field: {
+					value: formStore.proxy[fieldName],
+					onChange: (evt: ChangeEvent<HTMLInputElement>) =>
+						formStore.updateField(fieldName, evt.target.value),
+				},
+			};
+		},
+		[formStore]
+	);
+
 	const reset = useCallback(
 		(resetValues: ResetValues) => {
 			const resetKeys = resetValues ? Object.keys(resetValues) : formStore.getKeys();
@@ -54,5 +68,5 @@ export const useForm = () => {
 		[formStore, trigger]
 	);
 
-	return { watch, register, handleSubmit, trigger, reset, formState: { errors } };
+	return { watch, register, handleSubmit, trigger, reset, control, formState: { errors } };
 };

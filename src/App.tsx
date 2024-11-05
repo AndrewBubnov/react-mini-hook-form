@@ -1,6 +1,26 @@
 import { useForm } from './react-mini-hook-form/useForm.ts';
+import { Input } from './Input.tsx';
+import { Controller } from './react-mini-hook-form/Controller.tsx';
 
-function App() {
+const ControlledForm = () => {
+	const { control, handleSubmit, watch } = useForm();
+
+	console.log(watch());
+
+	return (
+		<form
+			style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}
+			onSubmit={handleSubmit(console.log)}
+		>
+			<label style={{ fontWeight: 600 }}>
+				Input
+				<Controller name="input" control={control} render={({ field }) => <Input {...field} />} />
+			</label>
+		</form>
+	);
+};
+
+const UncontrolledForm = () => {
 	const {
 		register,
 		handleSubmit,
@@ -52,6 +72,13 @@ function App() {
 			<button type="submit">Submit</button>
 		</form>
 	);
-}
+};
+
+const App = () => (
+	<div style={{ display: 'flex', flexDirection: 'column', gap: 100 }}>
+		<ControlledForm />
+		{/*<UncontrolledForm />*/}
+	</div>
+);
 
 export default App;
