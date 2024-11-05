@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormState } from './types.ts';
 import { FormStore } from './FormStore.ts';
 
@@ -7,7 +7,13 @@ export const useWatch = (formStore: FormStore) => {
 
 	const fieldNameListRef = useRef<string[]>([]);
 
+	const isFormWatched = Boolean(fieldNameListRef.current.length);
+
 	useEffect(() => {
+		if (!isFormWatched) {
+			setWatchedFormValue(prevState => ({ ...prevState }));
+			return;
+		}
 		const unsubscribeList: (() => void)[] = [];
 		fieldNameListRef.current.forEach(fieldName => {
 			const unsubscribe = formStore.subscribe(fieldName, newValue => {
@@ -17,7 +23,7 @@ export const useWatch = (formStore: FormStore) => {
 		});
 
 		return () => unsubscribeList.forEach(unsubscribe => unsubscribe());
-	}, [formStore]);
+	}, [formStore, isFormWatched]);
 
 	const watch = useCallback(
 		(key?: string) => {
@@ -34,5 +40,5 @@ export const useWatch = (formStore: FormStore) => {
 		[formStore, watchedFormValue]
 	);
 
-	return { watch, setWatchedFormValue };
+	return useMemo(() => ({ watch, setWatchedFormValue }), [watch]);
 };

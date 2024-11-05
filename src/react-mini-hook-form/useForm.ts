@@ -68,5 +68,8 @@ export const useForm = () => {
 		[formStore, trigger]
 	);
 
-	return { watch, register, handleSubmit, trigger, reset, control, formState: { errors } };
+	return useMemo(
+		() => ({ watch, register, handleSubmit, trigger, reset, control, formState: { errors } }),
+		[control, errors, handleSubmit, register, reset, trigger, watch]
+	);
 };

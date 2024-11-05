@@ -42,14 +42,12 @@ export class FormStore {
 	}
 
 	getKeys() {
-		console.log('line 45 this.base = ', this.base);
 		return Object.keys(this.base);
 	}
 
 	addField(key: string) {
 		if (key in this.base) return;
 		this.base[key] = '';
-		console.log('line 52 this.base = ', this.base);
 	}
 
 	updateField = (fieldName: string, fieldValue: string) => {
