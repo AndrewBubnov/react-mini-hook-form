@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
-import { Errors, FieldValidationOptions, FormState, UseFormProps, ValidationRules } from './types.ts';
-import { REQUIRED_FIELD_DEFAULT_MESSAGE } from './constants.ts';
+import { Errors, FieldValidationOptions, FormState, UseFormProps } from './types.ts';
+import { registerValidation } from './utils.ts';
 
 export const useValidation = (state: FormState, resolver: UseFormProps['resolver']) => {
 	const [errors, setErrors] = useState<Errors>({});
@@ -18,31 +18,11 @@ export const useValidation = (state: FormState, resolver: UseFormProps['resolver
 	);
 
 	const trigger = useCallback(() => {
-		const errors = Object.keys(validationMapRef.current).reduce((acc, cur) => {
-			if (validationMapRef.current[cur][ValidationRules.Required] && !state[cur]?.length) {
-				acc[cur] = { message: '' };
-				acc[cur].message =
-					typeof validationMapRef.current[cur][ValidationRules.Required] === 'string'
-						? validationMapRef.current[cur][ValidationRules.Required]
-						: REQUIRED_FIELD_DEFAULT_MESSAGE;
-			}
-			if (
-				validationMapRef.current[cur][ValidationRules.Min] &&
-				state[cur]?.length < validationMapRef.current[cur][ValidationRules.Min]
-			) {
-				acc[cur] = { message: '' };
-				acc[cur].message = `Min length is ${validationMapRef.current[cur][ValidationRules.Min]}`;
-			}
-			if (
-				validationMapRef.current[cur][ValidationRules.Max] &&
-				state[cur]?.length > validationMapRef.current[cur][ValidationRules.Max]
-			) {
-				acc[cur] = { message: '' };
-				acc[cur].message = `Max length is ${validationMapRef.current[cur][ValidationRules.Max]}`;
-			}
-			return acc;
-		}, {} as Errors);
-		if (Object.keys(errors).length) setErrors(errors);
+		const errors = Object.keys(validationMapRef.current).reduce(
+			registerValidation(validationMapRef.current, state),
+			{} as Errors
+		);
+		setErrors(errors);
 		return errors;
 	}, [state]);
 

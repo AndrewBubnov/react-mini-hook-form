@@ -1,6 +1,7 @@
 import { Controller, useForm, zodResolver } from './react-mini-hook-form';
 import { controlledForm } from './form.ts';
 import { Input } from './Input.tsx';
+import { FormState } from './react-mini-hook-form/types.ts';
 
 export const Controlled = () => {
 	const {
@@ -10,11 +11,13 @@ export const Controlled = () => {
 		formState: { errors },
 	} = useForm({ resolver: zodResolver(controlledForm) });
 
+	const submitHandler = async (data: FormState) => console.log(data);
+
 	// console.log(watch());
 	return (
 		<form
 			style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}
-			onSubmit={handleSubmit(console.log)}
+			onSubmit={handleSubmit(submitHandler)}
 		>
 			<label style={{ fontWeight: 600 }}>
 				<p>Input</p>

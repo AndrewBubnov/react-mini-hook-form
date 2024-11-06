@@ -44,7 +44,7 @@ export const useWatch = (
 		[formStore]
 	);
 
-	const watch = useCallback(
+	const createWatchList = useCallback(
 		(key?: string) => {
 			const updatedSet = new Set(fieldNameListRef.current);
 			if (key) {
@@ -53,10 +53,17 @@ export const useWatch = (
 				formStore.getKeys().forEach(field => updatedSet.add(field));
 			}
 			fieldNameListRef.current = Array.from(updatedSet);
+		},
+		[formStore]
+	);
+
+	const watch = useCallback(
+		(key?: string) => {
+			createWatchList(key);
 
 			return key ? formValue[key] ?? '' : formValue;
 		},
-		[formStore, formValue]
+		[createWatchList, formValue]
 	);
 
 	const reset = useCallback(
@@ -75,5 +82,5 @@ export const useWatch = (
 		[fieldsRefMap, formStore]
 	);
 
-	return useMemo(() => ({ watch, control, reset, setFormValue }), [control, reset, watch]);
+	return useMemo(() => ({ watch, control, reset, createWatchList }), [control, createWatchList, reset, watch]);
 };

@@ -16,7 +16,7 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 	const isSubmitted = useRef<boolean>(false);
 	const isValid = useRef<boolean>(false);
 
-	const { watch, control, reset } = useWatch(formStore, fieldsRefMap);
+	const { watch, control, reset, createWatchList } = useWatch(formStore, fieldsRefMap);
 
 	const { validate, trigger, errors, validationMapRef } = useValidation(formStore.proxy, resolverRef.current);
 
@@ -25,11 +25,11 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 	}, [isSubmitAttempted]);
 
 	useEffect(() => {
-		if (validationMode === Mode.Change) {
-			const formErrors = resolverRef.current ? validate(watch() as FormState).errors : trigger();
-			isValid.current = Boolean(!Object.keys(formErrors).length);
-		}
-	}, [trigger, validate, validationMode, watch]);
+		if (validationMode !== Mode.Change) return;
+		createWatchList();
+		const formErrors = resolverRef.current ? validate(watch() as FormState).errors : trigger();
+		isValid.current = Boolean(!Object.keys(formErrors).length);
+	}, [createWatchList, trigger, validate, validationMode, watch]);
 
 	const register = useCallback(
 		(fieldName: string, validationOptions?: FieldValidationOptions) => {
@@ -51,7 +51,8 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 		isSubmitted.current = true;
 		setIsSubmitting(false);
 		setIsSubmitAttempted(false);
-	}, []);
+		setValidationMode(mode);
+	}, [mode]);
 
 	const handleSubmit = useCallback(
 		(submitHandler: SubmitHandler) => async (evt: FormEvent) => {
