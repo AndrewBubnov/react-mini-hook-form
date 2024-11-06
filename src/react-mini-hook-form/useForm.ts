@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormStore } from './FormStore.ts';
-import { FieldValidationOptions, FormState, Mode, UseFormProps } from './types.ts';
+import { FieldValidationOptions, FormState, Mode, SubmitHandler, UseFormProps } from './types.ts';
 import { useValidation } from './useValidation.ts';
 import { useWatch } from './useWatch.ts';
 
@@ -10,6 +10,7 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 
 	const [isSubmitAttempted, setIsSubmitAttempted] = useState<boolean>(false);
 	const [validationMode, setValidationMode] = useState<Mode>(mode);
+	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
 	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
 	const isSubmitted = useRef<boolean>(false);
@@ -47,26 +48,29 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 	);
 
 	const onAfterSubmit = useCallback(() => {
-		setIsSubmitAttempted(false);
 		isSubmitted.current = true;
+		setIsSubmitting(false);
+		setIsSubmitAttempted(false);
 	}, []);
 
 	const handleSubmit = useCallback(
-		(submitHandler: (arg: FormState) => void) => (evt: FormEvent) => {
+		(submitHandler: SubmitHandler) => async (evt: FormEvent) => {
 			evt.preventDefault();
 			setIsSubmitAttempted(true);
 			const currentValues = formStore.getFormState();
 			if (resolverRef.current) {
 				const { values, errors } = validate(currentValues);
 				if (!Object.keys(errors).length) {
-					submitHandler(values);
+					setIsSubmitting(true);
+					await submitHandler(values);
 					onAfterSubmit();
 				}
 				return;
 			}
 			const errors = trigger();
 			if (!Object.keys(errors).length) {
-				submitHandler(currentValues);
+				setIsSubmitting(true);
+				await submitHandler(currentValues);
 				onAfterSubmit();
 			}
 		},
@@ -81,8 +85,8 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 			trigger,
 			reset,
 			control,
-			formState: { errors, isSubmitted: isSubmitted.current, isValid: isValid.current },
+			formState: { errors, isSubmitted: isSubmitted.current, isValid: isValid.current, isSubmitting },
 		}),
-		[control, errors, handleSubmit, register, reset, trigger, watch]
+		[control, errors, handleSubmit, isSubmitting, register, reset, trigger, watch]
 	);
 };

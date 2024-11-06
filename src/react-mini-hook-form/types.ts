@@ -27,3 +27,5 @@ export type UseFormProps = Partial<{
 	resolver: (values: FormState) => { values: FormState; errors: Errors };
 	mode: Mode;
 }>;
+
+export type SubmitHandler = (arg: FormState) => Promise<void>;
