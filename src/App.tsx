@@ -86,7 +86,7 @@ const UncontrolledForm = () => {
 
 const App = () => (
 	<div style={{ display: 'flex', flexDirection: 'column', gap: 100 }}>
-		<ControlledForm />
+		{/*<ControlledForm />*/}
 		<UncontrolledForm />
 	</div>
 );

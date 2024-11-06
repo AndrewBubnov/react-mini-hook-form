@@ -42,7 +42,7 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 				},
 			};
 		},
-		[formStore]
+		[formStore, validationMapRef]
 	);
 
 	const onAfterSubmit = useCallback(() => {
