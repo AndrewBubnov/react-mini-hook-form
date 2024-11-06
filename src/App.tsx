@@ -6,11 +6,11 @@ const ControlledForm = () => {
 	const {
 		control,
 		handleSubmit,
-		watch,
-		formState: { errors },
+		// watch,
+		formState: { errors, isValid },
 	} = useForm({ resolver: zodResolver(controlledForm) });
 
-	// console.log(watch());
+	console.log(isValid);
 	return (
 		<form
 			style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}
