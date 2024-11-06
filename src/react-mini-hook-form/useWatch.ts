@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FormState } from './types.ts';
+import { ChangeEvent, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FormState, ResetValues } from './types.ts';
 import { FormStore } from './FormStore.ts';
 
-export const useWatch = (formStore: FormStore) => {
-	const [watchedFormValue, setWatchedFormValue] = useState<FormState>(formStore.getFormState());
+export const useWatch = (
+	formStore: FormStore,
+	fieldsRefMap: MutableRefObject<Record<string, HTMLInputElement | null>>
+) => {
+	const [formValue, setFormValue] = useState<FormState>(formStore.getFormState());
 
 	const fieldNameListRef = useRef<string[]>([]);
 
@@ -11,19 +14,35 @@ export const useWatch = (formStore: FormStore) => {
 
 	useEffect(() => {
 		if (!isFormWatched) {
-			setWatchedFormValue(prevState => ({ ...prevState }));
+			setFormValue(prevState => ({ ...prevState }));
 			return;
 		}
 		const unsubscribeList: (() => void)[] = [];
 		fieldNameListRef.current.forEach(fieldName => {
 			const unsubscribe = formStore.subscribe(fieldName, newValue => {
-				setWatchedFormValue(prevState => ({ ...prevState, [fieldName]: newValue }));
+				setFormValue(prevState => ({ ...prevState, [fieldName]: newValue }));
 			});
 			unsubscribeList.push(unsubscribe);
 		});
 
 		return () => unsubscribeList.forEach(unsubscribe => unsubscribe());
 	}, [formStore, isFormWatched]);
+
+	const control = useCallback(
+		(fieldName: string) => {
+			formStore.addField(fieldName);
+			return {
+				field: {
+					value: formStore.proxy[fieldName] || '',
+					onChange: (evt: ChangeEvent<HTMLInputElement>) => {
+						formStore.updateField(fieldName, evt.target.value);
+						setFormValue(prevState => ({ ...prevState, [fieldName]: evt.target.value }));
+					},
+				},
+			};
+		},
+		[formStore]
+	);
 
 	const watch = useCallback(
 		(key?: string) => {
@@ -35,10 +54,26 @@ export const useWatch = (formStore: FormStore) => {
 			}
 			fieldNameListRef.current = Array.from(updatedSet);
 
-			return key ? watchedFormValue[key] ?? '' : watchedFormValue;
+			return key ? formValue[key] ?? '' : formValue;
 		},
-		[formStore, watchedFormValue]
+		[formStore, formValue]
 	);
 
-	return useMemo(() => ({ watch, setWatchedFormValue }), [watch]);
+	const reset = useCallback(
+		(resetValues: ResetValues) => {
+			const resetKeys = resetValues ? Object.keys(resetValues) : formStore.getKeys();
+
+			resetKeys.forEach(name => {
+				const field = fieldsRefMap.current[name];
+				if (field) {
+					field.value = resetValues?.[name] || '';
+				}
+			});
+			formStore.reset(resetValues);
+			setFormValue(formStore.getFormState());
+		},
+		[fieldsRefMap, formStore]
+	);
+
+	return useMemo(() => ({ watch, control, reset, setFormValue }), [control, reset, watch]);
 };

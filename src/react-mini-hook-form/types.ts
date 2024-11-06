@@ -8,6 +8,11 @@ export enum ValidationRules {
 	Max = 'max',
 }
 
+export enum Mode {
+	Submit = 'onSubmit',
+	Change = 'onChange',
+}
+
 export type FieldValidationOptions = Partial<{
 	[ValidationRules.Required]: boolean | string;
 	[ValidationRules.Min]: number;
@@ -18,6 +23,7 @@ export type Errors = Record<string, Record<'message', string>>;
 
 export type ResetValues = Record<string, string> | undefined;
 
-export type UseFormProps = {
-	resolver?: (values: FormState) => { values: FormState; errors: Errors };
-};
+export type UseFormProps = Partial<{
+	resolver: (values: FormState) => { values: FormState; errors: Errors };
+	mode: Mode;
+}>;

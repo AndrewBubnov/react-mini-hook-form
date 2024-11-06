@@ -1,8 +1,6 @@
-import { useForm } from './react-mini-hook-form/useForm.ts';
 import { Input } from './Input.tsx';
-import { Controller } from './react-mini-hook-form/Controller.tsx';
 import { controlledForm } from './form.ts';
-import { zodResolver } from './react-mini-hook-form/zodResolver.ts';
+import { useForm, Controller, zodResolver } from './react-mini-hook-form';
 
 const ControlledForm = () => {
 	const {
@@ -12,8 +10,7 @@ const ControlledForm = () => {
 		formState: { errors },
 	} = useForm({ resolver: zodResolver(controlledForm) });
 
-	console.log(watch());
-
+	// console.log(watch());
 	return (
 		<form
 			style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}

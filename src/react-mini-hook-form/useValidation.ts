@@ -1,20 +1,18 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Errors, FieldValidationOptions, FormState, UseFormProps, ValidationRules } from './types.ts';
 import { REQUIRED_FIELD_DEFAULT_MESSAGE } from './constants.ts';
 
 export const useValidation = (state: FormState, resolver: UseFormProps['resolver']) => {
 	const [errors, setErrors] = useState<Errors>({});
 	const [fieldValidationMap, setFieldValidationMap] = useState<Record<string, FieldValidationOptions>>({});
+	const resolverRef = useRef<UseFormProps['resolver']>(resolver);
 
-	const validate = useCallback(
-		(values: Record<string, string>) => {
-			if (!resolver) return { values, errors: {} };
-			const result = resolver(values);
-			if (result.errors) setErrors(result.errors);
-			return result;
-		},
-		[resolver]
-	);
+	const validate = useCallback((values: Record<string, string>) => {
+		if (!resolverRef.current) return { values, errors: {} };
+		const result = resolverRef.current(values);
+		if (result.errors) setErrors(result.errors);
+		return result;
+	}, []);
 
 	const trigger = useCallback(async () => {
 		const errors = Object.keys(fieldValidationMap).reduce((acc, cur) => {

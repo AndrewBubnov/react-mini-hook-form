@@ -1,20 +1,32 @@
-import { ChangeEvent, FormEvent, useCallback, useMemo, useRef } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormStore } from './FormStore.ts';
-import { FieldValidationOptions, FormState, ResetValues, UseFormProps } from './types.ts';
+import { FieldValidationOptions, FormState, Mode, UseFormProps } from './types.ts';
 import { useValidation } from './useValidation.ts';
 import { useWatch } from './useWatch.ts';
 
-export const useForm = ({ resolver }: UseFormProps = {}) => {
+export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => {
 	const formStore = useMemo(() => new FormStore(), []);
 
-	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
+	const [isSubmitAttempted, setIsSubmitAttempted] = useState<boolean>(false);
+	const [validationMode, setValidationMode] = useState<Mode>(mode);
 
-	const { watch, setWatchedFormValue } = useWatch(formStore);
+	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
+	const isSubmitted = useRef<boolean>(false);
+
+	const { watch, control, reset } = useWatch(formStore, fieldsRefMap);
 
 	const { validate, trigger, errors, setFieldValidationMap, fieldValidationMap } = useValidation(
 		formStore.proxy,
 		resolver
 	);
+
+	useEffect(() => {
+		if (isSubmitAttempted && !isSubmitted.current) setValidationMode(Mode.Change);
+	}, [isSubmitAttempted]);
+
+	useEffect(() => {
+		if (validationMode === Mode.Change) validate(watch() as FormState);
+	}, [validate, validationMode, watch]);
 
 	const register = useCallback(
 		(fieldName: string, validationOptions?: FieldValidationOptions) => {
@@ -32,53 +44,43 @@ export const useForm = ({ resolver }: UseFormProps = {}) => {
 		[fieldValidationMap, formStore, setFieldValidationMap]
 	);
 
-	const control = useCallback(
-		(fieldName: string) => {
-			formStore.addField(fieldName);
-			return {
-				field: {
-					value: formStore.proxy[fieldName] || '',
-					onChange: (evt: ChangeEvent<HTMLInputElement>) =>
-						formStore.updateField(fieldName, evt.target.value),
-				},
-			};
-		},
-		[formStore]
-	);
-
-	const reset = useCallback(
-		(resetValues: ResetValues) => {
-			const resetKeys = resetValues ? Object.keys(resetValues) : formStore.getKeys();
-
-			resetKeys.forEach(name => {
-				const field = fieldsRefMap.current[name];
-				if (field) {
-					field.value = resetValues?.[name] || '';
-				}
-			});
-			formStore.reset(resetValues);
-			setWatchedFormValue(formStore.getFormState());
-		},
-		[formStore, setWatchedFormValue]
-	);
+	const onAfterSubmit = useCallback(() => {
+		setIsSubmitAttempted(false);
+		isSubmitted.current = true;
+	}, []);
 
 	const handleSubmit = useCallback(
 		(submitHandler: (arg: FormState) => void) => async (evt: FormEvent) => {
 			evt.preventDefault();
+			setIsSubmitAttempted(true);
 			const currentValues = formStore.getFormState();
 			if (resolver) {
 				const { values, errors } = validate(currentValues);
-				if (!Object.keys(errors).length) submitHandler(values);
+				if (!Object.keys(errors).length) {
+					submitHandler(values);
+					onAfterSubmit();
+				}
 				return;
 			}
 			const errors = await trigger();
-			if (!Object.keys(errors).length) submitHandler(currentValues);
+			if (!Object.keys(errors).length) {
+				submitHandler(currentValues);
+				onAfterSubmit();
+			}
 		},
-		[formStore, resolver, trigger, validate]
+		[formStore, onAfterSubmit, resolver, trigger, validate]
 	);
 
 	return useMemo(
-		() => ({ watch, register, handleSubmit, trigger, reset, control, formState: { errors } }),
+		() => ({
+			watch,
+			register,
+			handleSubmit,
+			trigger,
+			reset,
+			control,
+			formState: { errors, isSubmitted: isSubmitted.current },
+		}),
 		[control, errors, handleSubmit, register, reset, trigger, watch]
 	);
 };
