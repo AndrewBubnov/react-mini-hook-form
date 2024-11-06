@@ -1,10 +1,20 @@
 import { useCallback, useState } from 'react';
-import { Errors, FieldValidationOptions, FormState, ValidationRules } from './types.ts';
+import { Errors, FieldValidationOptions, FormState, UseFormProps, ValidationRules } from './types.ts';
 import { REQUIRED_FIELD_DEFAULT_MESSAGE } from './constants.ts';
 
-export const useValidation = (state: FormState) => {
+export const useValidation = (state: FormState, resolver: UseFormProps['resolver']) => {
 	const [errors, setErrors] = useState<Errors>({});
 	const [fieldValidationMap, setFieldValidationMap] = useState<Record<string, FieldValidationOptions>>({});
+
+	const validate = useCallback(
+		(values: Record<string, string>) => {
+			if (!resolver) return { values, errors: {} };
+			const result = resolver(values);
+			if (result.errors) setErrors(result.errors);
+			return result;
+		},
+		[resolver]
+	);
 
 	const trigger = useCallback(async () => {
 		const errors = Object.keys(fieldValidationMap).reduce((acc, cur) => {
@@ -35,5 +45,5 @@ export const useValidation = (state: FormState) => {
 		return errors;
 	}, [fieldValidationMap, state]);
 
-	return { trigger, errors, setFieldValidationMap, fieldValidationMap };
+	return { trigger, errors, setFieldValidationMap, fieldValidationMap, validate };
 };

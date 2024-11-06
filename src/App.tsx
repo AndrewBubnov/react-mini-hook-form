@@ -1,9 +1,16 @@
 import { useForm } from './react-mini-hook-form/useForm.ts';
 import { Input } from './Input.tsx';
 import { Controller } from './react-mini-hook-form/Controller.tsx';
+import { controlledForm } from './form.ts';
+import { zodResolver } from './react-mini-hook-form/zodResolver.ts';
 
 const ControlledForm = () => {
-	const { control, handleSubmit, watch } = useForm();
+	const {
+		control,
+		handleSubmit,
+		watch,
+		formState: { errors },
+	} = useForm({ resolver: zodResolver(controlledForm) });
 
 	console.log(watch());
 
@@ -13,9 +20,15 @@ const ControlledForm = () => {
 			onSubmit={handleSubmit(console.log)}
 		>
 			<label style={{ fontWeight: 600 }}>
-				Input
+				<p>Input</p>
 				<Controller name="input" control={control} render={({ field }) => <Input {...field} />} />
 			</label>
+			{errors.input && (
+				<p role="alert" style={{ color: 'red' }}>
+					{errors.input?.message}
+				</p>
+			)}
+			<button type="submit">Submit</button>
 		</form>
 	);
 };
@@ -37,12 +50,12 @@ const UncontrolledForm = () => {
 			onSubmit={handleSubmit(console.log)}
 		>
 			<label style={{ fontWeight: 600 }}>
-				Title
+				<p>Title</p>
 				<input
 					type="text"
 					name="title"
 					placeholder="Update title..."
-					style={{ width: '100%', height: 40 }}
+					style={{ height: 40 }}
 					{...register('title', { required: true, min: 3 })}
 				/>
 				{errors.title && (
@@ -52,12 +65,12 @@ const UncontrolledForm = () => {
 				)}
 			</label>
 			<label style={{ fontWeight: 600 }}>
-				Body
+				<p>Body</p>
 				<input
 					type="text"
 					name="body"
 					placeholder="Update body..."
-					style={{ width: '100%', height: 40 }}
+					style={{ height: 40 }}
 					{...register('body', { required: 'Body is required', max: 5 })}
 				/>
 				{errors.body && (

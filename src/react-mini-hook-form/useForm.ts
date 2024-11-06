@@ -1,17 +1,20 @@
 import { ChangeEvent, FormEvent, useCallback, useMemo, useRef } from 'react';
 import { FormStore } from './FormStore.ts';
-import { FieldValidationOptions, FormState, ResetValues } from './types.ts';
+import { FieldValidationOptions, FormState, ResetValues, UseFormProps } from './types.ts';
 import { useValidation } from './useValidation.ts';
 import { useWatch } from './useWatch.ts';
 
-export const useForm = () => {
+export const useForm = ({ resolver }: UseFormProps = {}) => {
 	const formStore = useMemo(() => new FormStore(), []);
 
 	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
 
 	const { watch, setWatchedFormValue } = useWatch(formStore);
 
-	const { trigger, errors, setFieldValidationMap, fieldValidationMap } = useValidation(formStore.proxy);
+	const { validate, trigger, errors, setFieldValidationMap, fieldValidationMap } = useValidation(
+		formStore.proxy,
+		resolver
+	);
 
 	const register = useCallback(
 		(fieldName: string, validationOptions?: FieldValidationOptions) => {
@@ -62,10 +65,16 @@ export const useForm = () => {
 	const handleSubmit = useCallback(
 		(submitHandler: (arg: FormState) => void) => async (evt: FormEvent) => {
 			evt.preventDefault();
+			const currentValues = formStore.getFormState();
+			if (resolver) {
+				const { values, errors } = validate(currentValues);
+				if (!Object.keys(errors).length) submitHandler(values);
+				return;
+			}
 			const errors = await trigger();
-			if (!Object.keys(errors).length) submitHandler(formStore.getFormState());
+			if (!Object.keys(errors).length) submitHandler(currentValues);
 		},
-		[formStore, trigger]
+		[formStore, resolver, trigger, validate]
 	);
 
 	return useMemo(
