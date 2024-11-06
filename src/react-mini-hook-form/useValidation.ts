@@ -5,17 +5,19 @@ import { REQUIRED_FIELD_DEFAULT_MESSAGE } from './constants.ts';
 export const useValidation = (state: FormState, resolver: UseFormProps['resolver']) => {
 	const [errors, setErrors] = useState<Errors>({});
 
-	const resolverRef = useRef<UseFormProps['resolver']>(resolver);
 	const validationMapRef = useRef<Record<string, FieldValidationOptions>>({});
 
-	const validate = useCallback((values: Record<string, string>) => {
-		if (!resolverRef.current) return { values, errors: {} };
-		const result = resolverRef.current(values);
-		if (result.errors) setErrors(result.errors);
-		return result;
-	}, []);
+	const validate = useCallback(
+		(values: Record<string, string>) => {
+			if (!resolver) return { values, errors: {} };
+			const result = resolver(values);
+			if (result.errors) setErrors(result.errors);
+			return result;
+		},
+		[resolver]
+	);
 
-	const trigger = useCallback(async () => {
+	const trigger = useCallback(() => {
 		const errors = Object.keys(validationMapRef.current).reduce((acc, cur) => {
 			if (validationMapRef.current[cur][ValidationRules.Required] && !state[cur]?.length) {
 				acc[cur] = { message: '' };
@@ -40,9 +42,9 @@ export const useValidation = (state: FormState, resolver: UseFormProps['resolver
 			}
 			return acc;
 		}, {} as Errors);
-		setErrors(errors);
+		if (Object.keys(errors).length) setErrors(errors);
 		return errors;
-	}, [validationMapRef.current, state]);
+	}, [state]);
 
 	return { trigger, errors, validationMapRef, validate };
 };
