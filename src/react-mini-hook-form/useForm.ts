@@ -16,10 +16,7 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 
 	const { watch, control, reset } = useWatch(formStore, fieldsRefMap);
 
-	const { validate, trigger, errors, setFieldValidationMap, fieldValidationMap } = useValidation(
-		formStore.proxy,
-		resolver
-	);
+	const { validate, trigger, errors, validationMapRef } = useValidation(formStore.proxy, resolver);
 
 	useEffect(() => {
 		if (isSubmitAttempted && !isSubmitted.current) setValidationMode(Mode.Change);
@@ -35,8 +32,8 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 	const register = useCallback(
 		(fieldName: string, validationOptions?: FieldValidationOptions) => {
 			formStore.addField(fieldName);
-			if (validationOptions && !(fieldName in fieldValidationMap)) {
-				setFieldValidationMap(prevState => ({ ...prevState, [fieldName]: validationOptions }));
+			if (validationOptions) {
+				validationMapRef.current = { ...validationMapRef.current, [fieldName]: validationOptions };
 			}
 			return {
 				onChange: (evt: ChangeEvent<HTMLInputElement>) => formStore.updateField(fieldName, evt.target.value),
@@ -45,7 +42,7 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 				},
 			};
 		},
-		[fieldValidationMap, formStore, setFieldValidationMap]
+		[formStore]
 	);
 
 	const onAfterSubmit = useCallback(() => {

@@ -4,8 +4,9 @@ import { REQUIRED_FIELD_DEFAULT_MESSAGE } from './constants.ts';
 
 export const useValidation = (state: FormState, resolver: UseFormProps['resolver']) => {
 	const [errors, setErrors] = useState<Errors>({});
-	const [fieldValidationMap, setFieldValidationMap] = useState<Record<string, FieldValidationOptions>>({});
+
 	const resolverRef = useRef<UseFormProps['resolver']>(resolver);
+	const validationMapRef = useRef<Record<string, FieldValidationOptions>>({});
 
 	const validate = useCallback((values: Record<string, string>) => {
 		if (!resolverRef.current) return { values, errors: {} };
@@ -15,33 +16,33 @@ export const useValidation = (state: FormState, resolver: UseFormProps['resolver
 	}, []);
 
 	const trigger = useCallback(async () => {
-		const errors = Object.keys(fieldValidationMap).reduce((acc, cur) => {
-			if (fieldValidationMap[cur][ValidationRules.Required] && !state[cur]?.length) {
+		const errors = Object.keys(validationMapRef.current).reduce((acc, cur) => {
+			if (validationMapRef.current[cur][ValidationRules.Required] && !state[cur]?.length) {
 				acc[cur] = { message: '' };
 				acc[cur].message =
-					typeof fieldValidationMap[cur][ValidationRules.Required] === 'string'
-						? fieldValidationMap[cur][ValidationRules.Required]
+					typeof validationMapRef.current[cur][ValidationRules.Required] === 'string'
+						? validationMapRef.current[cur][ValidationRules.Required]
 						: REQUIRED_FIELD_DEFAULT_MESSAGE;
 			}
 			if (
-				fieldValidationMap[cur][ValidationRules.Min] &&
-				state[cur]?.length < fieldValidationMap[cur][ValidationRules.Min]
+				validationMapRef.current[cur][ValidationRules.Min] &&
+				state[cur]?.length < validationMapRef.current[cur][ValidationRules.Min]
 			) {
 				acc[cur] = { message: '' };
-				acc[cur].message = `Min length is ${fieldValidationMap[cur][ValidationRules.Min]}`;
+				acc[cur].message = `Min length is ${validationMapRef.current[cur][ValidationRules.Min]}`;
 			}
 			if (
-				fieldValidationMap[cur][ValidationRules.Max] &&
-				state[cur]?.length > fieldValidationMap[cur][ValidationRules.Max]
+				validationMapRef.current[cur][ValidationRules.Max] &&
+				state[cur]?.length > validationMapRef.current[cur][ValidationRules.Max]
 			) {
 				acc[cur] = { message: '' };
-				acc[cur].message = `Max length is ${fieldValidationMap[cur][ValidationRules.Max]}`;
+				acc[cur].message = `Max length is ${validationMapRef.current[cur][ValidationRules.Max]}`;
 			}
 			return acc;
 		}, {} as Errors);
 		setErrors(errors);
 		return errors;
-	}, [fieldValidationMap, state]);
+	}, [validationMapRef.current, state]);
 
-	return { trigger, errors, setFieldValidationMap, fieldValidationMap, validate };
+	return { trigger, errors, validationMapRef, validate };
 };

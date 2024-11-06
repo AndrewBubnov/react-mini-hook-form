@@ -7,10 +7,10 @@ const ControlledForm = () => {
 		control,
 		handleSubmit,
 		// watch,
-		formState: { errors, isValid },
+		formState: { errors },
 	} = useForm({ resolver: zodResolver(controlledForm) });
 
-	console.log(isValid);
+	// console.log(watch());
 	return (
 		<form
 			style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}
@@ -87,7 +87,7 @@ const UncontrolledForm = () => {
 const App = () => (
 	<div style={{ display: 'flex', flexDirection: 'column', gap: 100 }}>
 		<ControlledForm />
-		{/*<UncontrolledForm />*/}
+		<UncontrolledForm />
 	</div>
 );
 
