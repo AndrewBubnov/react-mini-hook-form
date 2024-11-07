@@ -1,8 +1,8 @@
-import { ChangeEvent, ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 type Field = {
 	value: string;
-	onChange: (evt: ChangeEvent<HTMLInputElement>) => void;
+	onChange(value: string): void;
 	className?: string;
 };
 

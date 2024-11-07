@@ -1,4 +1,4 @@
-import { ChangeEvent, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DefaultValues, FormState, ResetValues } from './types.ts';
 import { FormStore } from './FormStore.ts';
 
@@ -35,9 +35,9 @@ export const useWatch = (
 			return {
 				field: {
 					value: formStore.proxy[fieldName] || '',
-					onChange: (evt: ChangeEvent<HTMLInputElement>) => {
-						formStore.updateField(fieldName, evt.target.value);
-						setFormValue(prevState => ({ ...prevState, [fieldName]: evt.target.value }));
+					onChange: (value: string) => {
+						formStore.updateField(fieldName, value);
+						setFormValue(prevState => ({ ...prevState, [fieldName]: value }));
 					},
 				},
 			};
