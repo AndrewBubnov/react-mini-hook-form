@@ -1,7 +1,8 @@
 import { Controller, useForm, zodResolver } from './react-mini-hook-form';
 import { controlledForm } from './form.ts';
-import { Input } from './Input.tsx';
 import { FormState } from './react-mini-hook-form/types.ts';
+import { Button } from './components/ui/button.tsx';
+import { Input } from './components/ui/input.tsx';
 
 export const Controlled = () => {
 	const {
@@ -30,7 +31,7 @@ export const Controlled = () => {
 					{errors.input?.message}
 				</span>
 			)}
-			<button type="submit">Submit</button>
+			<Button type="submit">Submit</Button>
 		</form>
 	);
 };

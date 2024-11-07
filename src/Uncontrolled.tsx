@@ -1,5 +1,6 @@
 import { useForm } from './react-mini-hook-form';
 import { FormState } from './react-mini-hook-form/types.ts';
+import { Button } from './components/ui/button.tsx';
 
 export const Uncontrolled = () => {
 	const {
@@ -51,10 +52,10 @@ export const Uncontrolled = () => {
 					</p>
 				)}
 			</label>
-			<button type="button" onClick={() => reset({ title: 'title', body: 'Body' })}>
+			<Button type="button" onClick={() => reset({ title: 'title', body: 'Body' })}>
 				Reset
-			</button>
-			<button type="submit">Submit</button>
+			</Button>
+			<Button type="submit">Submit</Button>
 		</form>
 	);
 };
