@@ -1,14 +1,15 @@
 import { ChangeEvent, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FormState, ResetValues } from './types.ts';
+import { DefaultValues, FormState, ResetValues } from './types.ts';
 import { FormStore } from './FormStore.ts';
 
 export const useWatch = (
 	formStore: FormStore,
-	fieldsRefMap: MutableRefObject<Record<string, HTMLInputElement | null>>
+	fieldsRefMap: MutableRefObject<Record<string, HTMLInputElement | null>>,
+	defaultValues?: DefaultValues
 ) => {
-	const [formValue, setFormValue] = useState<FormState>(formStore.getFormState());
+	const [formValue, setFormValue] = useState<FormState>(defaultValues || {});
 
-	const fieldNameListRef = useRef<string[]>([]);
+	const fieldNameListRef = useRef<string[]>(defaultValues ? Object.keys(defaultValues) : []);
 
 	const isFormWatched = Boolean(fieldNameListRef.current.length);
 
@@ -33,7 +34,7 @@ export const useWatch = (
 			formStore.addField(fieldName);
 			return {
 				field: {
-					value: formStore.proxy[fieldName] || '',
+					value: formStore.proxy[fieldName] || defaultValues?.[fieldName] || '',
 					onChange: (evt: ChangeEvent<HTMLInputElement>) => {
 						formStore.updateField(fieldName, evt.target.value);
 						setFormValue(prevState => ({ ...prevState, [fieldName]: evt.target.value }));

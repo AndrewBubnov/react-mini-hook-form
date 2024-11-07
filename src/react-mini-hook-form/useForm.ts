@@ -4,7 +4,7 @@ import { FieldValidationOptions, FormState, Mode, SubmitHandler, UseFormProps } 
 import { useValidation } from './useValidation.ts';
 import { useWatch } from './useWatch.ts';
 
-export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => {
+export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormProps = {}) => {
 	const formStore = useMemo(() => new FormStore(), []);
 	const resolverRef = useRef<UseFormProps['resolver']>(resolver);
 
@@ -16,7 +16,7 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 	const isSubmitted = useRef<boolean>(false);
 	const isValid = useRef<boolean>(false);
 
-	const { watch, control, reset, createWatchList } = useWatch(formStore, fieldsRefMap);
+	const { watch, control, reset, createWatchList } = useWatch(formStore, fieldsRefMap, defaultValues);
 
 	const { validate, trigger, errors, validationMapRef } = useValidation(formStore.proxy, resolverRef.current);
 
@@ -33,18 +33,19 @@ export const useForm = ({ resolver, mode = Mode.Submit }: UseFormProps = {}) => 
 
 	const register = useCallback(
 		(fieldName: string, validationOptions?: FieldValidationOptions) => {
-			formStore.addField(fieldName);
+			formStore.addField(fieldName, defaultValues?.[fieldName]);
 			if (validationOptions) {
 				validationMapRef.current = { ...validationMapRef.current, [fieldName]: validationOptions };
 			}
 			return {
 				onChange: (evt: ChangeEvent<HTMLInputElement>) => formStore.updateField(fieldName, evt.target.value),
+				defaultValue: defaultValues?.[fieldName],
 				ref: (element: HTMLInputElement | null) => {
 					if (element) fieldsRefMap.current[fieldName] = element;
 				},
 			};
 		},
-		[formStore, validationMapRef]
+		[defaultValues, formStore, validationMapRef]
 	);
 
 	const onAfterSubmit = useCallback(() => {

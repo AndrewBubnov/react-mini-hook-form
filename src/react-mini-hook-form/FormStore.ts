@@ -45,9 +45,9 @@ export class FormStore {
 		return Object.keys(this.base);
 	}
 
-	addField(key: string) {
+	addField(key: string, defaultValue?: string) {
 		if (key in this.base) return;
-		this.base[key] = '';
+		this.base[key] = defaultValue || '';
 	}
 
 	updateField = (fieldName: string, fieldValue: string) => {

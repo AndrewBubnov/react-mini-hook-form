@@ -6,11 +6,16 @@ export const Uncontrolled = () => {
 		register,
 		handleSubmit,
 		reset,
-		// watch,
+		watch,
 		formState: { errors },
-	} = useForm();
+	} = useForm({
+		defaultValues: {
+			title: 'title',
+			// body: 'body',
+		},
+	});
 
-	// console.log(watch());
+	console.log(watch('title'));
 
 	const submitHandler = async (data: FormState) => console.log(data);
 

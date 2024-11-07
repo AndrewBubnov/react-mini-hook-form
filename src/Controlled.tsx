@@ -9,7 +9,7 @@ export const Controlled = () => {
 		handleSubmit,
 		// watch,
 		formState: { errors },
-	} = useForm({ resolver: zodResolver(controlledForm) });
+	} = useForm({ resolver: zodResolver(controlledForm), defaultValues: { input: 'input' } });
 
 	const submitHandler = async (data: FormState) => console.log(data);
 
