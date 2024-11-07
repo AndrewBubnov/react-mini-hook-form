@@ -20,36 +20,33 @@ export const Uncontrolled = () => {
 	const submitHandler = async (data: FormState) => console.log(data);
 
 	return (
-		<form
-			style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}
-			onSubmit={handleSubmit(submitHandler)}
-		>
-			<label style={{ fontWeight: 600 }}>
+		<form className="flex flex-col gap-4 p-5" onSubmit={handleSubmit(submitHandler)}>
+			<label className="font-semibold">
 				<p>Title</p>
 				<input
+					className="border border-gray-700 rounded p-1 h-10"
 					type="text"
 					name="title"
 					placeholder="Update title..."
-					style={{ height: 40 }}
 					{...register('title', { required: true, min: 3 })}
 				/>
 				{errors.title && (
-					<p role="alert" style={{ color: 'red' }}>
+					<p role="alert" className="text-red-500">
 						{errors.title?.message}
 					</p>
 				)}
 			</label>
-			<label style={{ fontWeight: 600 }}>
+			<label className="font-semibold">
 				<p>Body</p>
 				<input
+					className="border border-gray-700 rounded p-1 h-10"
 					type="text"
 					name="body"
 					placeholder="Update body..."
-					style={{ height: 40 }}
 					{...register('body', { required: 'Body is required', max: 5 })}
 				/>
 				{errors.body && (
-					<p role="alert" style={{ color: 'red' }}>
+					<p role="alert" className="text-red-500">
 						{errors.body?.message}
 					</p>
 				)}

@@ -15,18 +15,20 @@ export const Controlled = () => {
 
 	console.log(watch());
 	return (
-		<form
-			style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}
-			onSubmit={handleSubmit(submitHandler)}
-		>
-			<label style={{ fontWeight: 600 }}>
+		<form className="flex flex-col gap-4 p-5" onSubmit={handleSubmit(submitHandler)}>
+			<label className="font-semibold">
 				<p>Input</p>
-				<Controller name="input" control={control} render={({ field }) => <Input {...field} />} />
+				<Controller
+					className="border border-gray-700 rounded p-1"
+					name="input"
+					control={control}
+					render={({ field }) => <Input {...field} />}
+				/>
 			</label>
 			{errors.input && (
-				<p role="alert" style={{ color: 'red' }}>
+				<span role="alert" className="text-red-500">
 					{errors.input?.message}
-				</p>
+				</span>
 			)}
 			<button type="submit">Submit</button>
 		</form>
