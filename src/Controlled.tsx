@@ -7,13 +7,13 @@ export const Controlled = () => {
 	const {
 		control,
 		handleSubmit,
-		// watch,
+		watch,
 		formState: { errors },
 	} = useForm({ resolver: zodResolver(controlledForm), defaultValues: { input: 'input' } });
 
 	const submitHandler = async (data: FormState) => console.log(data);
 
-	// console.log(watch());
+	console.log(watch());
 	return (
 		<form
 			style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}

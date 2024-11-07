@@ -31,10 +31,10 @@ export const useWatch = (
 
 	const control = useCallback(
 		(fieldName: string) => {
-			formStore.addField(fieldName);
+			formStore.addField(fieldName, defaultValues?.[fieldName]);
 			return {
 				field: {
-					value: formStore.proxy[fieldName] || defaultValues?.[fieldName] || '',
+					value: formStore.proxy[fieldName] || '',
 					onChange: (evt: ChangeEvent<HTMLInputElement>) => {
 						formStore.updateField(fieldName, evt.target.value);
 						setFormValue(prevState => ({ ...prevState, [fieldName]: evt.target.value }));
@@ -42,7 +42,7 @@ export const useWatch = (
 				},
 			};
 		},
-		[formStore]
+		[defaultValues, formStore]
 	);
 
 	const createWatchList = useCallback(

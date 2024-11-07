@@ -1,12 +1,13 @@
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormStore } from './FormStore.ts';
-import { FieldValidationOptions, FormState, Mode, SubmitHandler, UseFormProps } from './types.ts';
+import { DefaultValues, FieldValidationOptions, FormState, Mode, SubmitHandler, UseFormProps } from './types.ts';
 import { useValidation } from './useValidation.ts';
 import { useWatch } from './useWatch.ts';
 
 export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormProps = {}) => {
 	const formStore = useMemo(() => new FormStore(), []);
 	const resolverRef = useRef<UseFormProps['resolver']>(resolver);
+	const defaultValueRef = useRef<DefaultValues>(defaultValues);
 
 	const [isSubmitAttempted, setIsSubmitAttempted] = useState<boolean>(false);
 	const [validationMode, setValidationMode] = useState<Mode>(mode);
@@ -16,7 +17,7 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 	const isSubmitted = useRef<boolean>(false);
 	const isValid = useRef<boolean>(false);
 
-	const { watch, control, reset, createWatchList } = useWatch(formStore, fieldsRefMap, defaultValues);
+	const { watch, control, reset, createWatchList } = useWatch(formStore, fieldsRefMap, defaultValueRef.current);
 
 	const { validate, trigger, errors, validationMapRef } = useValidation(formStore.proxy, resolverRef.current);
 
@@ -33,19 +34,19 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 
 	const register = useCallback(
 		(fieldName: string, validationOptions?: FieldValidationOptions) => {
-			formStore.addField(fieldName, defaultValues?.[fieldName]);
+			formStore.addField(fieldName, defaultValueRef.current?.[fieldName]);
 			if (validationOptions) {
 				validationMapRef.current = { ...validationMapRef.current, [fieldName]: validationOptions };
 			}
 			return {
 				onChange: (evt: ChangeEvent<HTMLInputElement>) => formStore.updateField(fieldName, evt.target.value),
-				defaultValue: defaultValues?.[fieldName],
+				defaultValue: defaultValueRef.current?.[fieldName],
 				ref: (element: HTMLInputElement | null) => {
 					if (element) fieldsRefMap.current[fieldName] = element;
 				},
 			};
 		},
-		[defaultValues, formStore, validationMapRef]
+		[formStore, validationMapRef]
 	);
 
 	const onAfterSubmit = useCallback(() => {
