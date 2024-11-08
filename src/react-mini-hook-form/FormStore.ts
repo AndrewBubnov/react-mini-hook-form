@@ -8,10 +8,10 @@ export class FormStore {
 	constructor() {
 		this.subscribers = {};
 		this.base = {};
-		this.proxy = this.createProxy({});
+		this.proxy = this.createProxy(this.base);
 	}
 
-	createProxy(base: Record<string, string>) {
+	createProxy(base: FormState) {
 		const handler = {
 			set: (target: FormState, property: string, value: string) => {
 				target[property] = value;

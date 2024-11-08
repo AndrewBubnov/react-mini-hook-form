@@ -34,7 +34,7 @@ export const Controlled = () => {
 			)}
 			<Controller
 				className="border border-gray-700 rounded p-1"
-				name="input"
+				name="select"
 				control={control}
 				render={({ field }) => (
 					<Select onValueChange={field.onChange} defaultValue={field.value}>
