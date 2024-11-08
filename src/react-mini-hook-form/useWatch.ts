@@ -51,7 +51,7 @@ export const useWatch = (
 			if (key) {
 				updatedSet.add(key);
 			} else {
-				formStore.getKeys().forEach(field => updatedSet.add(field));
+				formStore.getFields().forEach(field => updatedSet.add(field));
 			}
 			fieldNameListRef.current = Array.from(updatedSet);
 		},
@@ -69,7 +69,7 @@ export const useWatch = (
 
 	const reset = useCallback(
 		(resetValues: ResetValues) => {
-			const resetKeys = resetValues ? Object.keys(resetValues) : formStore.getKeys();
+			const resetKeys = resetValues ? Object.keys(resetValues) : formStore.getFields();
 
 			resetKeys.forEach(name => {
 				const field = fieldsRefMap.current[name];

@@ -41,7 +41,7 @@ export class FormStore {
 		return Object.assign({}, this.proxy);
 	}
 
-	getKeys() {
+	getFields() {
 		return Object.keys(this.base);
 	}
 
@@ -56,7 +56,7 @@ export class FormStore {
 	};
 
 	reset(resetValues: ResetValues) {
-		const resetKeys = resetValues ? Object.keys(resetValues) : this.getKeys();
+		const resetKeys = resetValues ? Object.keys(resetValues) : this.getFields();
 		this.proxy = this.createProxy(
 			resetKeys.reduce((acc, cur) => {
 				acc[cur] = resetValues?.[cur] || '';
