@@ -31,7 +31,7 @@ export const useWatch = (
 
 	const control = useCallback(
 		(fieldName: string) => {
-			formStore.addField(fieldName, defaultValues?.[fieldName]);
+			formStore.registerField({ fieldName, defaultValue: defaultValues?.[fieldName] });
 			return {
 				field: {
 					value: formStore.proxy[fieldName] || '',
@@ -40,6 +40,7 @@ export const useWatch = (
 						setFormValue(prevState => ({ ...prevState, [fieldName]: value }));
 					},
 				},
+				fieldArrayLength: formStore.getFieldsArrayLength(fieldName),
 			};
 		},
 		[defaultValues, formStore]

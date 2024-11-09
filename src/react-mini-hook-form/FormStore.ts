@@ -1,4 +1,4 @@
-import { FormState, ResetValues, Subscribers } from './types.ts';
+import { FormState, RegisterField, ResetValues, Subscribers } from './types.ts';
 
 export class FormStore {
 	subscribers: Subscribers;
@@ -45,10 +45,15 @@ export class FormStore {
 		return Object.keys(this.base);
 	}
 
-	addField(key: string, defaultValue?: string) {
-		if (key in this.base) return;
-		this.base[key] = '';
-		if (defaultValue) this.updateField(key, defaultValue);
+	registerField({ fieldName, defaultValue }: RegisterField) {
+		console.log({ fieldName });
+		if (fieldName in this.base) return;
+		this.base[fieldName] = '';
+		if (defaultValue) this.updateField(fieldName, defaultValue);
+	}
+
+	getFieldsArrayLength(fieldName: string) {
+		return Object.keys(this.proxy).filter(el => el.split('.')[0] === fieldName.split('.')[0]).length;
 	}
 
 	updateField = (fieldName: string, fieldValue: string) => {

@@ -34,7 +34,7 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 
 	const register = useCallback(
 		(fieldName: string, validationOptions?: FieldValidationOptions) => {
-			formStore.addField(fieldName, defaultValueRef.current?.[fieldName]);
+			formStore.registerField({ fieldName, defaultValue: defaultValueRef.current?.[fieldName] });
 			if (validationOptions) {
 				validationMapRef.current = { ...validationMapRef.current, [fieldName]: validationOptions };
 			}
