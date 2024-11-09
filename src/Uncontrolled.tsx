@@ -8,6 +8,7 @@ export const Uncontrolled = () => {
 		handleSubmit,
 		reset,
 		watch,
+		trigger,
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
@@ -54,6 +55,9 @@ export const Uncontrolled = () => {
 			</label>
 			<Button type="button" onClick={() => reset({ title: 'title', body: 'Body' })}>
 				Reset
+			</Button>
+			<Button type="button" onClick={trigger}>
+				Trigger
 			</Button>
 			<Button type="submit">Submit</Button>
 		</form>

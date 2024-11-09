@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormStore } from './FormStore.ts';
-import { DefaultValues, FieldValidationOptions, FormState, Mode, SubmitHandler, UseFormProps } from './types.ts';
+import { DefaultValues, FieldValidationOptions, Mode, SubmitHandler, UseFormProps } from './types.ts';
 import { useValidation } from './useValidation.ts';
 import { useWatch } from './useWatch.ts';
 
@@ -9,7 +9,6 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 	const resolverRef = useRef<UseFormProps['resolver']>(resolver);
 	const defaultValueRef = useRef<DefaultValues>(defaultValues);
 
-	const [isSubmitAttempted, setIsSubmitAttempted] = useState<boolean>(false);
 	const [validationMode, setValidationMode] = useState<Mode>(mode);
 	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -19,18 +18,21 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 
 	const { watch, control, reset, createWatchList } = useWatch(formStore, fieldsRefMap, defaultValueRef.current);
 
-	const { validate, trigger, errors, validationMapRef } = useValidation(formStore.proxy, resolverRef.current);
+	const { trigger, errors, validationMapRef, isTriggered, setIsTriggered } = useValidation(
+		formStore.proxy,
+		resolverRef.current
+	);
 
 	useEffect(() => {
-		if (isSubmitAttempted && !isSubmitted.current) setValidationMode(Mode.Change);
-	}, [isSubmitAttempted]);
+		if (isTriggered && !isSubmitted.current) setValidationMode(Mode.Change);
+	}, [isTriggered]);
 
 	useEffect(() => {
 		if (validationMode !== Mode.Change) return;
 		createWatchList();
-		const formErrors = resolverRef.current ? validate(watch() as FormState).errors : trigger();
-		isValid.current = Boolean(!Object.keys(formErrors).length);
-	}, [createWatchList, trigger, validate, validationMode, watch]);
+		const formErrors = resolverRef.current ? trigger().errors : trigger();
+		isValid.current = Boolean(!Object.keys(formErrors || {}).length);
+	}, [createWatchList, trigger, validationMode, watch]);
 
 	const register = useCallback(
 		(fieldName: string, validationOptions?: FieldValidationOptions) => {
@@ -52,24 +54,15 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 	const onAfterSubmit = useCallback(() => {
 		isSubmitted.current = true;
 		setIsSubmitting(false);
-		setIsSubmitAttempted(false);
+		setIsTriggered(false);
 		setValidationMode(mode);
-	}, [mode]);
+	}, [mode, setIsTriggered]);
 
 	const handleSubmit = useCallback(
 		(submitHandler: SubmitHandler) => async (evt: FormEvent) => {
 			evt.preventDefault();
-			setIsSubmitAttempted(true);
+			setIsTriggered(true);
 			const currentValues = formStore.getFormState();
-			if (resolverRef.current) {
-				const { values, errors } = validate(currentValues);
-				if (!Object.keys(errors).length) {
-					setIsSubmitting(true);
-					await submitHandler(values);
-					onAfterSubmit();
-				}
-				return;
-			}
 			const errors = trigger();
 			if (!Object.keys(errors).length) {
 				setIsSubmitting(true);
@@ -77,7 +70,7 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 				onAfterSubmit();
 			}
 		},
-		[formStore, onAfterSubmit, trigger, validate]
+		[formStore, onAfterSubmit, setIsTriggered, trigger]
 	);
 
 	return useMemo(
