@@ -10,6 +10,7 @@ export const Controlled = () => {
 		control,
 		handleSubmit,
 		watch,
+		trigger,
 		formState: { errors },
 	} = useForm({ resolver: zodResolver(controlledForm), defaultValues: { input: 'input' } });
 
@@ -50,6 +51,9 @@ export const Controlled = () => {
 				)}
 			/>
 
+			<Button type="button" onClick={trigger}>
+				Trigger
+			</Button>
 			<Button type="submit">Submit</Button>
 		</form>
 	);

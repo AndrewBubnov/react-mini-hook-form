@@ -9,17 +9,17 @@ export const useWatch = (
 ) => {
 	const [formValue, setFormValue] = useState<FormState>(defaultValues || {});
 
-	const fieldNameListRef = useRef<string[]>(defaultValues ? Object.keys(defaultValues) : []);
+	const watchedNameListRef = useRef<string[]>(defaultValues ? Object.keys(defaultValues) : []);
 
-	const isFormWatched = Boolean(fieldNameListRef.current.length);
+	const watchedNameListLength = watchedNameListRef.current.length;
 
 	useEffect(() => {
-		if (!isFormWatched) {
+		if (!watchedNameListLength) {
 			setFormValue(prevState => ({ ...prevState }));
 			return;
 		}
 		const unsubscribeList: (() => void)[] = [];
-		fieldNameListRef.current.forEach(fieldName => {
+		watchedNameListRef.current.forEach(fieldName => {
 			const unsubscribe = formStore.subscribe(fieldName, newValue => {
 				setFormValue(prevState => ({ ...prevState, [fieldName]: newValue }));
 			});
@@ -27,7 +27,7 @@ export const useWatch = (
 		});
 
 		return () => unsubscribeList.forEach(unsubscribe => unsubscribe());
-	}, [formStore, isFormWatched]);
+	}, [formStore, watchedNameListLength]);
 
 	const control = useCallback(
 		(fieldName: string) => {
@@ -47,13 +47,13 @@ export const useWatch = (
 
 	const createWatchList = useCallback(
 		(key?: string) => {
-			const updatedSet = new Set(fieldNameListRef.current);
+			const updatedSet = new Set(watchedNameListRef.current);
 			if (key) {
 				updatedSet.add(key);
 			} else {
 				formStore.getFields().forEach(field => updatedSet.add(field));
 			}
-			fieldNameListRef.current = Array.from(updatedSet);
+			watchedNameListRef.current = Array.from(updatedSet);
 		},
 		[formStore]
 	);
@@ -61,7 +61,6 @@ export const useWatch = (
 	const watch = useCallback(
 		(key?: string) => {
 			createWatchList(key);
-
 			return key ? formValue[key] ?? '' : formValue;
 		},
 		[createWatchList, formValue]
