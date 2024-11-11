@@ -32,9 +32,3 @@ export type UseFormProps = Partial<{
 }>;
 
 export type SubmitHandler = (arg: FormState) => Promise<void>;
-
-export type RegisterField = {
-	fieldName: string;
-	defaultValue?: string;
-	isArrayRegistered?: boolean;
-};

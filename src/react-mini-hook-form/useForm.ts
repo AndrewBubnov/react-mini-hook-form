@@ -1,22 +1,23 @@
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormStore } from './FormStore.ts';
-import { DefaultValues, FieldValidationOptions, Mode, SubmitHandler, UseFormProps } from './types.ts';
+import { FieldValidationOptions, Mode, SubmitHandler, UseFormProps } from './types.ts';
 import { useValidation } from './useValidation.ts';
 import { useWatch } from './useWatch.ts';
 
 export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormProps = {}) => {
-	const formStore = useMemo(() => new FormStore(), []);
-	const resolverRef = useRef<UseFormProps['resolver']>(resolver);
-	const defaultValueRef = useRef<DefaultValues>(defaultValues);
+	const defaultValuesRef = useRef(defaultValues);
+
+	const formStore = useMemo(() => new FormStore(defaultValuesRef.current), []);
 
 	const [validationMode, setValidationMode] = useState<Mode>(mode);
 	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+	const resolverRef = useRef<UseFormProps['resolver']>(resolver);
 	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
 	const isSubmitted = useRef<boolean>(false);
 	const isValid = useRef<boolean>(false);
 
-	const { watch, control, reset, createWatchList } = useWatch(formStore, fieldsRefMap, defaultValueRef.current);
+	const { watch, control, reset, createWatchList } = useWatch(formStore, fieldsRefMap);
 
 	const { trigger, errors, validationMapRef, isTriggered, setIsTriggered } = useValidation(
 		formStore.data,
@@ -36,13 +37,13 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 
 	const register = useCallback(
 		(fieldName: string, validationOptions?: FieldValidationOptions) => {
-			formStore.registerField({ fieldName, defaultValue: defaultValueRef.current?.[fieldName] });
+			formStore.registerField(fieldName);
 			if (validationOptions) {
 				validationMapRef.current = { ...validationMapRef.current, [fieldName]: validationOptions };
 			}
 			return {
 				onChange: (evt: ChangeEvent<HTMLInputElement>) => formStore.updateField(fieldName, evt.target.value),
-				defaultValue: defaultValueRef.current?.[fieldName],
+				defaultValue: defaultValuesRef.current?.[fieldName],
 				ref: (element: HTMLInputElement | null) => {
 					if (element) fieldsRefMap.current[fieldName] = element;
 				},

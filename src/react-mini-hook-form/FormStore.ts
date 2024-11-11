@@ -1,11 +1,13 @@
-import { FormState, RegisterField, ResetValues, Subscribers } from './types.ts';
+import { DefaultValues, FormState, ResetValues, Subscribers } from './types.ts';
 
 export class FormStore {
 	subscribers: Subscribers;
 	base: FormState;
 	data: FormState;
+	defaultValues: DefaultValues;
 
-	constructor() {
+	constructor(defaultValues?: DefaultValues) {
+		this.defaultValues = defaultValues;
 		this.subscribers = {};
 		this.base = {};
 		this.data = this.createProxy(this.base);
@@ -45,10 +47,9 @@ export class FormStore {
 		return Object.keys(this.base);
 	}
 
-	registerField({ fieldName, defaultValue, isArrayRegistered }: RegisterField) {
+	registerField(fieldName: string, isArrayRegistered?: boolean) {
 		if (fieldName in this.base || isArrayRegistered) return;
-		this.base[fieldName] = '';
-		if (defaultValue) this.updateField(fieldName, defaultValue);
+		this.base[fieldName] = this.defaultValues?.[fieldName] || '';
 	}
 
 	getFieldsArrayLength(fieldName: string) {
