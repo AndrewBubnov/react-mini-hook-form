@@ -32,8 +32,8 @@ export const useWatch = (
 	const control = useCallback(
 		(fieldName: string, isArrayRegistered?: boolean) => {
 			formStore.registerField({ fieldName, defaultValue: defaultValues?.[fieldName], isArrayRegistered });
-			const removeField = (fieldName: string, index: number) => {
-				formStore.removeFieldFromArray(fieldName, index);
+			const removeField = (index: number, fieldName: string) => {
+				formStore.removeFieldFromArray(index, fieldName);
 				setFormValue(prevState =>
 					Object.keys(prevState)
 						.filter(key => key !== fieldName)

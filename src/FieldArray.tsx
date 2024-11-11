@@ -22,7 +22,7 @@ export const FieldArray = () => {
 								<Input {...field} onChange={evt => field.onChange(evt.target.value)} />
 							)}
 						/>
-						<Button onClick={() => remove(`test.${index}`, index)} type="button">
+						<Button onClick={() => remove(index)} type="button">
 							Delete
 						</Button>
 					</div>

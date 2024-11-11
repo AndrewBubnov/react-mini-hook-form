@@ -59,7 +59,7 @@ export class FormStore {
 		this.proxy[fieldName] = fieldValue;
 	};
 
-	removeFieldFromArray(fieldName: string, index: number) {
+	removeFieldFromArray(index: number, fieldName: string) {
 		const length = this.getFieldsArrayLength(fieldName);
 		delete this.base[fieldName];
 		const [fieldBase] = fieldName.split('.');

@@ -8,7 +8,7 @@ type UseFieldArray = {
 	) => {
 		field: { value: string; onChange: (value: string) => void };
 		fieldArrayLength: number;
-		removeField: (fieldName: string, index: number) => void;
+		removeField: (index: number, fieldName: string) => void;
 	};
 	name: string;
 };
@@ -27,8 +27,8 @@ export const useFieldArray = ({ control, name }: UseFieldArray) => {
 
 	const append = useCallback(() => control(`${name}.${length}`).field.onChange(''), [control, length, name]);
 	const remove = useCallback(
-		(fieldName: string, index: number) => control(fieldName).removeField(fieldName, index),
-		[control]
+		(index: number) => control(`${name}.${index}`).removeField(index, `${name}.${index}`),
+		[control, name]
 	);
 
 	return useMemo(() => ({ fields, append, remove }), [append, fields, remove]);
