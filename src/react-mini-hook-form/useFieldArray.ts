@@ -26,10 +26,7 @@ export const useFieldArray = ({ control, name }: UseFieldArray) => {
 	);
 
 	const append = useCallback(() => control(`${name}.${length}`).field.onChange(''), [control, length, name]);
-	const remove = useCallback(
-		(index: number) => control(`${name}.${index}`).removeField(index, `${name}.${index}`),
-		[control, name]
-	);
+	const remove = useCallback((index: number) => control(name, true).removeField(index, name), [control, name]);
 
 	return useMemo(() => ({ fields, append, remove }), [append, fields, remove]);
 };

@@ -59,16 +59,15 @@ export class FormStore {
 		this.proxy[fieldName] = fieldValue;
 	};
 
-	removeFieldFromArray(index: number, fieldName: string) {
-		const length = this.getFieldsArrayLength(fieldName);
-		delete this.base[fieldName];
-		const [fieldBase] = fieldName.split('.');
+	removeFieldFromArray(index: number, arrayName: string) {
+		const length = this.getFieldsArrayLength(arrayName);
+		delete this.base[`${arrayName}.${index}`];
 
 		const indexArray = Array.from({ length: length - index - 1 }, (_, localIndex) => index + 1 + localIndex);
-		indexArray.forEach(i => {
-			const currentValue = this.proxy[`${fieldBase}.${i}`];
-			this.updateField(`${fieldBase}.${i - 1}`, currentValue);
-			delete this.base[`${fieldBase}.${i}`];
+		indexArray.forEach(arrayIndex => {
+			const currentValue = this.proxy[`${arrayName}.${arrayIndex}`];
+			this.updateField(`${arrayName}.${arrayIndex - 1}`, currentValue);
+			delete this.base[`${arrayName}.${arrayIndex}`];
 		});
 	}
 
