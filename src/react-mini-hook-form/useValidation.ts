@@ -1,20 +1,24 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Errors, FieldValidationOptions, FormState, UseFormProps } from './types.ts';
 import { registerValidation } from './utils.ts';
 
-export const useValidation = (state: FormState, resolver: UseFormProps['resolver']) => {
+export const useValidation = (state: FormState, resolver: UseFormProps['resolver'], isSubmitted: boolean) => {
 	const [errors, setErrors] = useState<Errors>({});
 	const [isTriggered, setIsTriggered] = useState<boolean>(false);
 
 	const validationMapRef = useRef<Record<string, FieldValidationOptions>>({});
 
+	useEffect(() => {
+		if (isSubmitted) setIsTriggered(false);
+	}, [isSubmitted]);
+
 	const updateErrors = useCallback((errors: Errors) => {
 		setErrors(errors);
-		if (Object.keys(errors).length) setIsTriggered(true);
 		return errors;
 	}, []);
 
 	const trigger = useCallback(() => {
+		setIsTriggered(true);
 		if (resolver) {
 			if (!resolver) return {};
 			const { errors } = resolver(Object.assign({}, state));

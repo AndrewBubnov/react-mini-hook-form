@@ -11,22 +11,23 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 
 	const [validationMode, setValidationMode] = useState<Mode>(mode);
 	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+	const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
 	const resolverRef = useRef<UseFormProps['resolver']>(resolver);
 	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
-	const isSubmitted = useRef<boolean>(false);
 	const isValid = useRef<boolean>(false);
 
 	const { watch, control, reset, createWatchList } = useWatch(formStore, fieldsRefMap);
 
-	const { trigger, errors, validationMapRef, isTriggered, setIsTriggered } = useValidation(
+	const { trigger, errors, validationMapRef, isTriggered } = useValidation(
 		formStore.data,
-		resolverRef.current
+		resolverRef.current,
+		isSubmitted
 	);
 
 	useEffect(() => {
-		if (isTriggered && !isSubmitted.current) setValidationMode(Mode.Change);
-	}, [isTriggered]);
+		if (isTriggered && !isSubmitted) setValidationMode(Mode.Change);
+	}, [isSubmitted, isTriggered]);
 
 	useEffect(() => {
 		if (validationMode !== Mode.Change) return;
@@ -53,16 +54,14 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 	);
 
 	const onAfterSubmit = useCallback(() => {
-		isSubmitted.current = true;
+		setIsSubmitted(true);
 		setIsSubmitting(false);
-		setIsTriggered(false);
 		setValidationMode(mode);
-	}, [mode, setIsTriggered]);
+	}, [mode]);
 
 	const handleSubmit = useCallback(
 		(submitHandler: SubmitHandler) => async (evt: FormEvent) => {
 			evt.preventDefault();
-			setIsTriggered(true);
 			const currentValues = formStore.getFormState();
 			const errors = trigger();
 			if (!Object.keys(errors).length) {
@@ -71,7 +70,7 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 				onAfterSubmit();
 			}
 		},
-		[formStore, onAfterSubmit, setIsTriggered, trigger]
+		[formStore, onAfterSubmit, trigger]
 	);
 
 	return useMemo(
@@ -82,8 +81,8 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 			trigger,
 			reset,
 			control,
-			formState: { errors, isSubmitted: isSubmitted.current, isValid: isValid.current, isSubmitting },
+			formState: { errors, isSubmitted, isValid: isValid.current, isSubmitting },
 		}),
-		[control, errors, handleSubmit, isSubmitting, register, reset, trigger, watch]
+		[control, errors, handleSubmit, isSubmitted, isSubmitting, register, reset, trigger, watch]
 	);
 };
