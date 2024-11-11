@@ -36,5 +36,5 @@ export type SubmitHandler = (arg: FormState) => Promise<void>;
 export type RegisterField = {
 	fieldName: string;
 	defaultValue?: string;
-	isArray?: boolean;
+	isArrayRegistered?: boolean;
 };

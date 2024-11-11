@@ -45,9 +45,8 @@ export class FormStore {
 		return Object.keys(this.base);
 	}
 
-	registerField({ fieldName, defaultValue }: RegisterField) {
-		console.log({ fieldName });
-		if (fieldName in this.base) return;
+	registerField({ fieldName, defaultValue, isArrayRegistered }: RegisterField) {
+		if (fieldName in this.base || isArrayRegistered) return;
 		this.base[fieldName] = '';
 		if (defaultValue) this.updateField(fieldName, defaultValue);
 	}
@@ -59,6 +58,19 @@ export class FormStore {
 	updateField = (fieldName: string, fieldValue: string) => {
 		this.proxy[fieldName] = fieldValue;
 	};
+
+	removeFieldFromArray(fieldName: string, index: number) {
+		const length = this.getFieldsArrayLength(fieldName);
+		delete this.base[fieldName];
+		const [fieldBase] = fieldName.split('.');
+
+		const indexArray = Array.from({ length: length - index - 1 }, (_, localIndex) => index + 1 + localIndex);
+		indexArray.forEach(i => {
+			const currentValue = this.proxy[`${fieldBase}.${i}`];
+			this.updateField(`${fieldBase}.${i - 1}`, currentValue);
+			delete this.base[`${fieldBase}.${i}`];
+		});
+	}
 
 	reset(resetValues: ResetValues) {
 		const resetKeys = resetValues ? Object.keys(resetValues) : this.getFields();

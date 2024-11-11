@@ -30,8 +30,19 @@ export const useWatch = (
 	}, [formStore, watchedNameListLength]);
 
 	const control = useCallback(
-		(fieldName: string) => {
-			formStore.registerField({ fieldName, defaultValue: defaultValues?.[fieldName] });
+		(fieldName: string, isArrayRegistered?: boolean) => {
+			formStore.registerField({ fieldName, defaultValue: defaultValues?.[fieldName], isArrayRegistered });
+			const removeField = (fieldName: string, index: number) => {
+				formStore.removeFieldFromArray(fieldName, index);
+				setFormValue(prevState =>
+					Object.keys(prevState)
+						.filter(key => key !== fieldName)
+						.reduce((acc, cur) => {
+							acc[cur] = prevState[cur];
+							return acc;
+						}, {} as FormState)
+				);
+			};
 			return {
 				field: {
 					value: formStore.proxy[fieldName] || '',
@@ -41,6 +52,7 @@ export const useWatch = (
 					},
 				},
 				fieldArrayLength: formStore.getFieldsArrayLength(fieldName),
+				removeField,
 			};
 		},
 		[defaultValues, formStore]
