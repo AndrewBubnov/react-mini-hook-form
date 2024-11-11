@@ -19,7 +19,7 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 	const { watch, control, reset, createWatchList } = useWatch(formStore, fieldsRefMap, defaultValueRef.current);
 
 	const { trigger, errors, validationMapRef, isTriggered, setIsTriggered } = useValidation(
-		formStore.proxy,
+		formStore.data,
 		resolverRef.current
 	);
 

@@ -3,12 +3,12 @@ import { FormState, RegisterField, ResetValues, Subscribers } from './types.ts';
 export class FormStore {
 	subscribers: Subscribers;
 	base: FormState;
-	proxy: FormState;
+	data: FormState;
 
 	constructor() {
 		this.subscribers = {};
 		this.base = {};
-		this.proxy = this.createProxy(this.base);
+		this.data = this.createProxy(this.base);
 	}
 
 	createProxy(base: FormState) {
@@ -38,7 +38,7 @@ export class FormStore {
 	}
 
 	getFormState() {
-		return Object.assign({}, this.proxy);
+		return Object.assign({}, this.data);
 	}
 
 	getFields() {
@@ -52,11 +52,11 @@ export class FormStore {
 	}
 
 	getFieldsArrayLength(fieldName: string) {
-		return Object.keys(this.proxy).filter(el => el.split('.')[0] === fieldName.split('.')[0]).length;
+		return Object.keys(this.data).filter(el => el.split('.')[0] === fieldName.split('.')[0]).length;
 	}
 
 	updateField = (fieldName: string, fieldValue: string) => {
-		this.proxy[fieldName] = fieldValue;
+		this.data[fieldName] = fieldValue;
 	};
 
 	removeFieldFromArray(index: number, arrayName: string) {
@@ -65,7 +65,7 @@ export class FormStore {
 
 		const indexArray = Array.from({ length: length - index - 1 }, (_, localIndex) => index + 1 + localIndex);
 		indexArray.forEach(arrayIndex => {
-			const currentValue = this.proxy[`${arrayName}.${arrayIndex}`];
+			const currentValue = this.data[`${arrayName}.${arrayIndex}`];
 			this.updateField(`${arrayName}.${arrayIndex - 1}`, currentValue);
 			delete this.base[`${arrayName}.${arrayIndex}`];
 		});
@@ -73,7 +73,7 @@ export class FormStore {
 
 	reset(resetValues: ResetValues) {
 		const resetKeys = resetValues ? Object.keys(resetValues) : this.getFields();
-		this.proxy = this.createProxy(
+		this.data = this.createProxy(
 			resetKeys.reduce((acc, cur) => {
 				acc[cur] = resetValues?.[cur] || '';
 				return acc;

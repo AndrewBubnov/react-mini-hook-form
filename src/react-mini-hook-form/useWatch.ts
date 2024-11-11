@@ -45,7 +45,7 @@ export const useWatch = (
 			};
 			return {
 				field: {
-					value: formStore.proxy[fieldName] || '',
+					value: formStore.data[fieldName] || '',
 					onChange: (value: string) => {
 						formStore.updateField(fieldName, value);
 						setFormValue(prevState => ({ ...prevState, [fieldName]: value }));
