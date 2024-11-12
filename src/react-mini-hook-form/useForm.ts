@@ -17,7 +17,7 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
 	const isValid = useRef<boolean>(false);
 
-	const { watch, control, reset, createWatchList } = useWatch(formStore, fieldsRefMap);
+	const { watch, control, reset, createWatchList, formValue } = useWatch(formStore, fieldsRefMap);
 
 	const { trigger, errors, validationMapRef, isTriggered } = useValidation(
 		formStore.data,
@@ -30,11 +30,12 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 	}, [isSubmitted, isTriggered]);
 
 	useEffect(() => {
-		if (validationMode !== Mode.Change) return;
-		createWatchList();
-		const formErrors = trigger();
-		isValid.current = Boolean(!Object.keys(formErrors || {}).length);
-	}, [createWatchList, trigger, validationMode, watch]);
+		if (validationMode === Mode.Change) {
+			createWatchList();
+			const formErrors = trigger();
+			isValid.current = Boolean(!Object.keys(formErrors || {}).length);
+		}
+	}, [formValue, createWatchList, validationMode, trigger]);
 
 	const register = useCallback(
 		(fieldName: string, validationOptions?: FieldValidationOptions) => {

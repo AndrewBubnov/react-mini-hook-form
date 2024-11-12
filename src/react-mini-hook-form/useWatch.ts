@@ -95,5 +95,8 @@ export const useWatch = (
 		[fieldsRefMap, formStore]
 	);
 
-	return useMemo(() => ({ watch, control, reset, createWatchList }), [control, createWatchList, reset, watch]);
+	return useMemo(
+		() => ({ watch, control, reset, createWatchList, formValue }),
+		[control, createWatchList, reset, watch, formValue]
+	);
 };
