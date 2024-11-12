@@ -3,12 +3,7 @@ import { FormStore } from './FormStore.ts';
 import { FieldValidationOptions, FormState, Mode, ResetValues, SubmitHandler, UseFormProps } from './types.ts';
 import { useValidation } from './useValidation.ts';
 import { useWatchList } from './useWatchList.ts';
-
-const useLatest = <T>(value: T) => {
-	const ref = useRef(value);
-	ref.current = value;
-	return ref;
-};
+import { useLatest } from './useLatest.ts';
 
 const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormProps = {}) => {
 	const formStore = useMemo(() => new FormStore(defaultValues), [defaultValues]);
@@ -23,9 +18,9 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 
 	const { trigger, errors, validationMapRef, isTriggered, setIsTriggered } = useValidation(formStore.data, resolver);
 
-	const formValueRef = useLatest(formValue);
-
 	const { watchedNameListRef, createWatchList } = useWatchList(formStore, defaultValues);
+
+	const formValueRef = useLatest(formValue);
 
 	const watchedNameListLength = watchedNameListRef.current.length;
 
