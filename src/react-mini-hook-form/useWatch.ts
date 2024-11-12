@@ -47,7 +47,6 @@ export const useWatch = (
 				field: {
 					value: formStore.data[fieldName] || '',
 					onChange: (value: string) => {
-						// console.log(value);
 						formStore.updateField(fieldName, value);
 						setFormValue(prevState => ({ ...prevState, [fieldName]: value }));
 					},
@@ -56,7 +55,7 @@ export const useWatch = (
 				removeField,
 			};
 		},
-		[defaultValues, formStore]
+		[formStore]
 	);
 
 	const createWatchList = useCallback(
