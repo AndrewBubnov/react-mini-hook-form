@@ -6,17 +6,18 @@ import { Input } from './components/ui/input.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select.tsx';
 
 export const Controlled = () => {
+	const hook = useForm({ resolver: zodResolver(controlledForm), defaultValues: { input: 'input' } });
 	const {
 		control,
 		handleSubmit,
 		watch,
 		trigger,
 		formState: { errors },
-	} = useForm({ resolver: zodResolver(controlledForm), defaultValues: { input: 'input' } });
-
+	} = hook;
 	const submitHandler = async (data: FormState) => console.log(data);
 
 	console.log(watch());
+
 	return (
 		<form className="flex flex-col gap-4 p-5" onSubmit={handleSubmit(submitHandler)}>
 			<label className="font-semibold">
