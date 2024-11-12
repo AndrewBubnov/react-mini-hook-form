@@ -32,7 +32,7 @@ export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm
 	useEffect(() => {
 		if (validationMode !== Mode.Change) return;
 		createWatchList();
-		const formErrors = resolverRef.current ? trigger().errors : trigger();
+		const formErrors = trigger();
 		isValid.current = Boolean(!Object.keys(formErrors || {}).length);
 	}, [createWatchList, trigger, validationMode, watch]);
 
