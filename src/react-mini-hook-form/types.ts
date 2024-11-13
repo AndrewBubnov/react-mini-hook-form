@@ -23,7 +23,7 @@ export type Errors = Record<string, Record<'message', string>>;
 
 export type ResetValues = Record<string, string> | undefined;
 
-export type DefaultValues = Record<string, string> | undefined;
+export type DefaultValues = Record<string, string | Record<string, string>> | undefined;
 
 export type UseFormProps = Partial<{
 	resolver: (values: FormState) => { values: FormState; errors: Errors };

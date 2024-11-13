@@ -49,11 +49,25 @@ export class FormStore {
 
 	registerField(fieldName: string, isArrayRegistered?: boolean) {
 		if (fieldName in this.base || isArrayRegistered) return;
+
+		if (fieldName.includes('.') && fieldName.split('.')[0] in (this.defaultValues || {})) {
+			const [firstField, , thirdField] = fieldName.split('.');
+			if (thirdField) {
+				this.base[fieldName] = this.defaultValues?.[firstField][thirdField];
+			} else {
+				this.base[fieldName] = this.defaultValues?.[firstField];
+			}
+			return;
+		}
 		this.base[fieldName] = this.defaultValues?.[fieldName] || '';
 	}
 
 	getFieldsArrayLength(fieldName: string) {
-		return Object.keys(this.data).filter(el => el.split('.')[0] === fieldName.split('.')[0]).length;
+		return new Set(
+			Object.keys(this.data)
+				.filter(key => fieldName === key.split('.')[0])
+				.map(key => key.split('.')[1])
+		).size;
 	}
 
 	updateField = (fieldName: string, fieldValue: string) => {

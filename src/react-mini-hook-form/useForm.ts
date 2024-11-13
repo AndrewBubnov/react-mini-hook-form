@@ -11,7 +11,7 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 	const [validationMode, setValidationMode] = useState<Mode>(mode);
 	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 	const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-	const [formValue, setFormValue] = useState<FormState>(formStore.defaultValues || {});
+	const [formValue, setFormValue] = useState<FormState>({});
 
 	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
 	const isValid = useRef<boolean>(false);
@@ -74,6 +74,7 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 						setFormValue(prevState => ({ ...prevState, [fieldName]: value }));
 					},
 				},
+				defaultValue: formStore.defaultValues?.[fieldName],
 				fieldArrayLength: formStore.getFieldsArrayLength(fieldName),
 				removeField,
 			};
