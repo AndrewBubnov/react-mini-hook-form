@@ -26,7 +26,7 @@ export const normalizeDefaultValues = (defaultValues: DefaultValues): Record<str
 	return Object.entries(defaultValues).reduce((acc, [key, value]) => {
 		if (typeof value === 'object' && value !== null) {
 			Object.entries(value).forEach(([nestedKey, nestedValue]) => {
-				acc[`${key}.0.${nestedKey}`] = nestedValue;
+				acc[`${key}.${nestedKey}`] = nestedValue;
 			});
 		} else {
 			acc[key] = value as string;

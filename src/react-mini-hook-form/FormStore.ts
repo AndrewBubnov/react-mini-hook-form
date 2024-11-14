@@ -50,14 +50,21 @@ export class FormStore {
 
 	registerField(fieldName: string, isArrayRegistered?: boolean) {
 		if (fieldName in this.base || isArrayRegistered) return;
-		this.base[fieldName] = (this.defaultValues as ObjectType)?.[fieldName] || '';
+		const fieldList = fieldName.split('.');
+		const dataFields = fieldList.slice(0, fieldList.length - 1);
+
+		if (!dataFields.length) {
+			this.base[fieldName] = this.defaultValues?.[fieldName] || '';
+			return;
+		}
+		this.base[fieldName] = this.defaultValues?.[dataFields.join('.')] || '';
 	}
 
 	getFieldsArrayLength(fieldName: string) {
 		return new Set(
 			Object.keys(this.data)
 				.filter(key => fieldName === key.split('.')[0])
-				.map(key => key.split('.')[1])
+				.map(key => key.split('.').at(-1))
 		).size;
 	}
 
@@ -67,9 +74,12 @@ export class FormStore {
 
 	removeFieldFromArray(index: number, arrayName: string) {
 		const length = this.getFieldsArrayLength(arrayName);
+
 		const fieldsToDelete = Object.keys(this.base).filter(key => {
-			const [firstChunk, secondChunk] = key.split('.');
-			return firstChunk === arrayName && secondChunk === String(index);
+			const fieldsList = key.split('.');
+			const [firstField] = fieldsList;
+			const lastField = fieldsList.at(-1);
+			return firstField === arrayName && lastField === String(index);
 		});
 
 		if (!fieldsToDelete.length) return;
@@ -78,11 +88,28 @@ export class FormStore {
 			delete this.base[field];
 		});
 
+		const deletedFieldsBaseList = fieldsToDelete.map(el => {
+			const fieldsList = el.split('.');
+			return fieldsList.slice(0, fieldsList.length - 1).join('.');
+		});
+
 		const indexArray = Array.from({ length: length - index - 1 }, (_, localIndex) => index + 1 + localIndex);
 		indexArray.forEach(arrayIndex => {
-			const currentValue = this.data[`${arrayName}.${arrayIndex}`];
-			this.updateField(`${arrayName}.${arrayIndex - 1}`, currentValue);
-			delete this.base[`${arrayName}.${arrayIndex}`];
+			const fieldsToReplace = Object.keys(this.base).filter(key => {
+				const fieldsList = key.split('.');
+				const lastField: string = fieldsList.at(-1) || '';
+				return (
+					deletedFieldsBaseList.includes(fieldsList.slice(0, fieldsList.length - 1).join('.')) &&
+					arrayIndex === +lastField
+				);
+			});
+			fieldsToReplace.forEach(field => {
+				const currentValue = this.data[field];
+				const fieldArray = field.split('.');
+				const updatedFieldBase = fieldArray.slice(0, fieldArray.length - 1).join('.');
+				this.updateField(`${updatedFieldBase}.${arrayIndex - 1}`, currentValue);
+				delete this.base[field];
+			});
 		});
 	}
 

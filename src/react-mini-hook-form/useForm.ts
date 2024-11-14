@@ -20,16 +20,9 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 
 	const { watchedNameListRef, createWatchList } = useWatchList(formStore, defaultValues);
 
-	const baseRef = useLatest(formStore.base);
 	const formValueRef = useLatest(formValue);
 
 	const watchedNameListLength = watchedNameListRef.current.length;
-
-	const storeKeysLength = Object.keys(formStore.base).length;
-
-	useEffect(() => {
-		setFormValue(baseRef.current);
-	}, [storeKeysLength, baseRef]);
 
 	useEffect(() => {
 		if (isTriggered && !isSubmitted) setValidationMode(Mode.Change);
@@ -82,7 +75,6 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 					},
 				},
 				defaultValue: defaultValues?.[fieldName],
-				fieldArrayLength: formStore.getFieldsArrayLength(fieldName),
 				removeField,
 			};
 		},

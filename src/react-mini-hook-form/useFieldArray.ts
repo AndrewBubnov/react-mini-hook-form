@@ -7,7 +7,6 @@ type Control = (
 	isArrayRegistered?: boolean
 ) => {
 	field: { value: string; onChange: (value: string) => void };
-	fieldArrayLength: number;
 	removeField: (index: number, fieldName: string) => void;
 	defaultValue?: ObjectType | string;
 };
@@ -18,26 +17,27 @@ type UseFieldArray = {
 };
 
 export const useFieldArray = ({ control, name }: UseFieldArray) => {
-	const { defaultValue } = control(name, true);
+	const { defaultValue = {}, removeField } = control(name, true);
 
-	const [length, setLength] = useState(Object.keys(defaultValue || {}).length ? 1 : 0);
+	const defaultLength = Number(Boolean(Object.keys(defaultValue)));
+	const [listLength, setListLength] = useState(defaultLength);
 
 	const fields = useMemo(
 		() =>
-			Array.from({ length }, () => {
+			Array.from({ length: listLength }, () => {
 				const id = nanoid();
 				return { id };
 			}),
-		[length]
+		[listLength]
 	);
 
-	const append = useCallback(() => setLength(prevLength => prevLength + 1), []);
+	const append = useCallback(() => setListLength(prevLength => prevLength + 1), []);
 	const remove = useCallback(
 		(index: number) => {
-			control(name, true).removeField(index, name);
-			setLength(prevLength => prevLength - 1);
+			removeField(index, name);
+			setListLength(prevLength => prevLength - 1);
 		},
-		[control, name]
+		[name, removeField]
 	);
 
 	return useMemo(() => ({ fields, append, remove }), [append, fields, remove]);

@@ -8,7 +8,6 @@ export const FieldArray = () => {
 	const { control } = useForm({
 		defaultValues: {
 			test: { firstName: 'Andrew', lastName: 'Bubnov', position: 'frontend developer' },
-			test1: 'test1',
 		},
 	});
 
@@ -23,7 +22,7 @@ export const FieldArray = () => {
 							<span>First name</span>
 							<Controller
 								className="border border-gray-700 rounded p-1"
-								name={`test.${index}.firstName`}
+								name={`test.firstName.${index}`}
 								control={control}
 								render={({ field }) => (
 									<Input {...field} onChange={evt => field.onChange(evt.target.value)} />
@@ -34,7 +33,7 @@ export const FieldArray = () => {
 							<span>Second name</span>
 							<Controller
 								className="border border-gray-700 rounded p-1"
-								name={`test.${index}.lastName`}
+								name={`test.lastName.${index}`}
 								control={control}
 								render={({ field }) => (
 									<Input {...field} onChange={evt => field.onChange(evt.target.value)} />
@@ -45,7 +44,7 @@ export const FieldArray = () => {
 							<span>Position</span>
 							<Controller
 								className="border border-gray-700 rounded p-1"
-								name={`test.${index}.position`}
+								name={`test.position.${index}`}
 								control={control}
 								render={({ field }) => (
 									<Input {...field} onChange={evt => field.onChange(evt.target.value)} />
