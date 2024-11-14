@@ -1,13 +1,14 @@
-import { DefaultValues, FormState, ResetValues, Subscribers } from './types.ts';
+import { DefaultValues, FormState, ObjectType, ResetValues, Subscribers } from './types.ts';
+import { normalizeDefaultValues } from './utils.ts';
 
 export class FormStore {
 	subscribers: Subscribers;
 	base: FormState;
 	data: FormState;
-	defaultValues: DefaultValues;
+	defaultValues: ObjectType;
 
 	constructor(defaultValues?: DefaultValues) {
-		this.defaultValues = defaultValues;
+		this.defaultValues = normalizeDefaultValues(defaultValues);
 		this.subscribers = {};
 		this.base = {};
 		this.data = this.createProxy(this.base);
@@ -49,17 +50,7 @@ export class FormStore {
 
 	registerField(fieldName: string, isArrayRegistered?: boolean) {
 		if (fieldName in this.base || isArrayRegistered) return;
-
-		if (fieldName.includes('.') && fieldName.split('.')[0] in (this.defaultValues || {})) {
-			const [firstField, , thirdField] = fieldName.split('.');
-			if (thirdField) {
-				this.base[fieldName] = this.defaultValues?.[firstField][thirdField];
-			} else {
-				this.base[fieldName] = this.defaultValues?.[firstField];
-			}
-			return;
-		}
-		this.base[fieldName] = this.defaultValues?.[fieldName] || '';
+		this.base[fieldName] = (this.defaultValues as ObjectType)?.[fieldName] || '';
 	}
 
 	getFieldsArrayLength(fieldName: string) {
@@ -76,7 +67,16 @@ export class FormStore {
 
 	removeFieldFromArray(index: number, arrayName: string) {
 		const length = this.getFieldsArrayLength(arrayName);
-		delete this.base[`${arrayName}.${index}`];
+		const fieldsToDelete = Object.keys(this.base).filter(key => {
+			const [firstChunk, secondChunk] = key.split('.');
+			return firstChunk === arrayName && secondChunk === String(index);
+		});
+
+		if (!fieldsToDelete.length) return;
+
+		fieldsToDelete.forEach(field => {
+			delete this.base[field];
+		});
 
 		const indexArray = Array.from({ length: length - index - 1 }, (_, localIndex) => index + 1 + localIndex);
 		indexArray.forEach(arrayIndex => {

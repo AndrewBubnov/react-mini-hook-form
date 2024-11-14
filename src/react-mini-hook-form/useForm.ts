@@ -11,7 +11,7 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 	const [validationMode, setValidationMode] = useState<Mode>(mode);
 	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 	const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-	const [formValue, setFormValue] = useState<FormState>({});
+	const [formValue, setFormValue] = useState<FormState>(formStore.defaultValues);
 
 	const fieldsRefMap = useRef<Record<string, HTMLInputElement | null>>({});
 	const isValid = useRef<boolean>(false);
@@ -20,9 +20,16 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 
 	const { watchedNameListRef, createWatchList } = useWatchList(formStore, defaultValues);
 
+	const baseRef = useLatest(formStore.base);
 	const formValueRef = useLatest(formValue);
 
 	const watchedNameListLength = watchedNameListRef.current.length;
+
+	const storeKeysLength = Object.keys(formStore.base).length;
+
+	useEffect(() => {
+		setFormValue(baseRef.current);
+	}, [storeKeysLength, baseRef]);
 
 	useEffect(() => {
 		if (isTriggered && !isSubmitted) setValidationMode(Mode.Change);
@@ -59,7 +66,7 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 				formStore.removeFieldFromArray(index, fieldName);
 				setFormValue(prevState =>
 					Object.keys(prevState)
-						.filter(key => key !== fieldName)
+						.filter(key => key !== `${fieldName}.${index}`)
 						.reduce((acc, cur) => {
 							acc[cur] = prevState[cur];
 							return acc;
@@ -74,12 +81,12 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 						setFormValue(prevState => ({ ...prevState, [fieldName]: value }));
 					},
 				},
-				defaultValue: formStore.defaultValues?.[fieldName],
+				defaultValue: defaultValues?.[fieldName],
 				fieldArrayLength: formStore.getFieldsArrayLength(fieldName),
 				removeField,
 			};
 		},
-		[formStore]
+		[defaultValues, formStore]
 	);
 
 	const watch = useCallback(
@@ -114,13 +121,13 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 			}
 			return {
 				onChange: (evt: ChangeEvent<HTMLInputElement>) => formStore.updateField(fieldName, evt.target.value),
-				defaultValue: defaultValues?.[fieldName],
+				defaultValue: formStore.defaultValues?.[fieldName],
 				ref: (element: HTMLInputElement | null) => {
 					if (element) fieldsRefMap.current[fieldName] = element;
 				},
 			};
 		},
-		[defaultValues, formStore, validationMapRef]
+		[formStore, validationMapRef]
 	);
 
 	const onAfterSubmit = useCallback(() => {

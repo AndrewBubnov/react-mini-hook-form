@@ -1,4 +1,6 @@
-export type FormState = Record<string, string>;
+export type ObjectType = Record<string, string>;
+
+export type FormState = ObjectType;
 
 export type Subscribers = Record<string, ((arg: string) => void)[]>;
 
@@ -21,9 +23,9 @@ export type FieldValidationOptions = Partial<{
 
 export type Errors = Record<string, Record<'message', string>>;
 
-export type ResetValues = Record<string, string> | undefined;
+export type ResetValues = ObjectType | undefined;
 
-export type DefaultValues = Record<string, string | Record<string, string>> | undefined;
+export type DefaultValues = Record<string, string | ObjectType> | undefined;
 
 export type UseFormProps = Partial<{
 	resolver: (values: FormState) => { values: FormState; errors: Errors };

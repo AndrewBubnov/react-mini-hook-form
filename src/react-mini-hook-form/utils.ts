@@ -1,4 +1,4 @@
-import { Errors, FieldValidationOptions, FormState, ValidationRules } from './types.ts';
+import { DefaultValues, Errors, FieldValidationOptions, FormState, ObjectType, ValidationRules } from './types.ts';
 import { REQUIRED_FIELD_DEFAULT_MESSAGE } from './constants.ts';
 
 export const registerValidation =
@@ -19,3 +19,18 @@ export const registerValidation =
 		}
 		return acc;
 	};
+
+export const normalizeDefaultValues = (defaultValues: DefaultValues): Record<string, string> => {
+	if (!defaultValues) return {};
+
+	return Object.entries(defaultValues).reduce((acc, [key, value]) => {
+		if (typeof value === 'object' && value !== null) {
+			Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+				acc[`${key}.0.${nestedKey}`] = nestedValue;
+			});
+		} else {
+			acc[key] = value as string;
+		}
+		return acc;
+	}, {} as ObjectType);
+};

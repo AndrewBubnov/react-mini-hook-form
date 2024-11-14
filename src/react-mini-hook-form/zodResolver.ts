@@ -1,7 +1,8 @@
 import z from 'zod';
+import { ObjectType } from './types.ts';
 
 export const zodResolver = (schema: z.ZodSchema) => {
-	return (values: Record<string, string>) => {
+	return (values: ObjectType) => {
 		try {
 			const result = schema.parse(values);
 			return {
