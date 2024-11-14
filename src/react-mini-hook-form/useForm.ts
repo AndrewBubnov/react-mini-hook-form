@@ -75,6 +75,7 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 					},
 				},
 				defaultValue: defaultValues?.[fieldName],
+				shiftFields: formStore.shiftFields,
 				removeField,
 			};
 		},

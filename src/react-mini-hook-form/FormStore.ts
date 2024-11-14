@@ -48,8 +48,7 @@ export class FormStore {
 		return Object.keys(this.base);
 	}
 
-	registerField(fieldName: string, isArrayRegistered?: boolean) {
-		if (fieldName in this.base || isArrayRegistered) return;
+	setDefaultFieldValue(fieldName: string) {
 		const fieldList = fieldName.split('.');
 		const dataFields = fieldList.slice(0, fieldList.length - 1);
 
@@ -58,6 +57,11 @@ export class FormStore {
 			return;
 		}
 		this.base[fieldName] = this.defaultValues?.[dataFields.join('.')] || '';
+	}
+
+	registerField(fieldName: string, isArrayRegistered?: boolean) {
+		if (fieldName in this.base || isArrayRegistered) return;
+		this.setDefaultFieldValue(fieldName);
 	}
 
 	getFieldsArrayLength(fieldName: string) {
@@ -112,6 +116,42 @@ export class FormStore {
 			});
 		});
 	}
+
+	shiftFields = (arrayName: string) => {
+		const length = this.getFieldsArrayLength(arrayName);
+
+		const prependedFieldsBases = Object.keys(this.base)
+			.filter(key => {
+				const fieldsList = key.split('.');
+				const [firstField] = fieldsList;
+				const lastField = fieldsList.at(-1);
+				return firstField === arrayName && lastField === '0';
+			})
+			.map(el => {
+				const fieldsList = el.split('.');
+				return fieldsList.slice(0, fieldsList.length - 1).join('.');
+			});
+
+		const indexArray = Array.from({ length }, (_, index) => index);
+
+		indexArray.forEach(arrayIndex => {
+			const fieldsToReplace = Object.keys(this.base).filter(key => {
+				const fieldsList = key.split('.');
+				const lastField: string = fieldsList.at(-1) || '';
+				return (
+					prependedFieldsBases.includes(fieldsList.slice(0, fieldsList.length - 1).join('.')) &&
+					arrayIndex === +lastField
+				);
+			});
+			fieldsToReplace.forEach(fieldName => {
+				const currentValue = this.data[fieldName];
+				const fieldArray = fieldName.split('.');
+				const updatedFieldBase = fieldArray.slice(0, fieldArray.length - 1).join('.');
+				this.updateField(`${updatedFieldBase}.${arrayIndex + 1}`, currentValue);
+				this.setDefaultFieldValue(fieldName);
+			});
+		});
+	};
 
 	reset(resetValues: ResetValues) {
 		const resetKeys = resetValues ? Object.keys(resetValues) : this.getFields();

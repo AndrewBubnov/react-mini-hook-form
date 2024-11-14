@@ -7,7 +7,8 @@ type Control = (
 	isArrayRegistered?: boolean
 ) => {
 	field: { value: string; onChange: (value: string) => void };
-	removeField: (index: number, fieldName: string) => void;
+	removeField(index: number, fieldName: string): void;
+	shiftFields(name: string): void;
 	defaultValue?: ObjectType | string;
 };
 
@@ -17,9 +18,9 @@ type UseFieldArray = {
 };
 
 export const useFieldArray = ({ control, name }: UseFieldArray) => {
-	const { defaultValue = {}, removeField } = control(name, true);
+	const { defaultValue, removeField, shiftFields } = control(name, true);
 
-	const defaultLength = Number(Boolean(Object.keys(defaultValue)));
+	const defaultLength = defaultValue && Object.keys(defaultValue).length ? 1 : 0;
 	const [listLength, setListLength] = useState(defaultLength);
 
 	const fields = useMemo(
@@ -39,6 +40,10 @@ export const useFieldArray = ({ control, name }: UseFieldArray) => {
 		},
 		[name, removeField]
 	);
+	const prepend = useCallback(() => {
+		append();
+		shiftFields(name);
+	}, [append, name, shiftFields]);
 
-	return useMemo(() => ({ fields, append, remove }), [append, fields, remove]);
+	return useMemo(() => ({ fields, append, remove, prepend }), [append, fields, prepend, remove]);
 };

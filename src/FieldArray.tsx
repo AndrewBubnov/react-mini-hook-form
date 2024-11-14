@@ -11,10 +11,13 @@ export const FieldArray = () => {
 		},
 	});
 
-	const { fields, append, remove } = useFieldArray({ control, name: 'test' });
+	const { fields, append, remove, prepend } = useFieldArray({ control, name: 'test' });
 	return (
-		<div>
-			<Button onClick={append}>Add form</Button>
+		<div className="flex flex-col gap-5">
+			<div className="flex gap-[300px]">
+				<Button onClick={append}>Append form</Button>
+				<Button onClick={prepend}>Prepend form</Button>
+			</div>
 			<form className="flex flex-col gap-4 pt-5">
 				{fields.map(({ id }, index) => (
 					<div className="flex gap-5 items-end" key={id}>
