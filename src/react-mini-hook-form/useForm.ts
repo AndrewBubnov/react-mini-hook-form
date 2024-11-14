@@ -56,7 +56,7 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 		(fieldName: string, isArrayRegistered?: boolean) => {
 			formStore.registerField(fieldName, isArrayRegistered);
 			const removeField = (index: number, fieldName: string) => {
-				formStore.removeFieldFromArray(index, fieldName);
+				formStore.removeFormFields(index, fieldName);
 				setFormValue(prevState =>
 					Object.keys(prevState)
 						.filter(key => key !== `${fieldName}.${index}`)

@@ -72,7 +72,7 @@ export class FormStore {
 		this.data[fieldName] = fieldValue;
 	};
 
-	removeFieldFromArray(index: number, arrayName: string) {
+	removeFormFields(index: number, arrayName: string) {
 		const length = this.getFieldsArrayLength(arrayName);
 
 		const fieldsToDelete = Object.keys(this.base).filter(key => {
