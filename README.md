@@ -1,50 +1,53 @@
-# React + TypeScript + Vite
+# React Mini Hook Form
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React Mini Hook Form is a lightweight library inspired by **React Hook Form**, offering implementations of the most frequently used features for managing forms. It provides a user-friendly API for handling both static and dynamic forms, including validation support and seamless integration with UI libraries.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Key Features
 
-## Expanding the ESLint configuration
+### 🔧 `useForm` Hook
+- Provides state management for both **controlled** and **uncontrolled forms**.
+- Includes core functions:
+  - `register` — to register **uncontrolled fields**.
+  - `control` — to register and manage **controlled fields**.
+  - `trigger` — to programmatically validate the form.
+  - `handleSubmit` — to handle form submission.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+#### **Validation**
+- Validation rules can be provided:
+  - Directly to `register`.
+  - Via `resolver` when initializing `useForm`.
+- Fully compatible with the React Hook Form validation API.
+- Supports integration with the **Zod** library through `zodResolver`, which is available from **react-mini-hook-form** to minimize peer dependencies.
 
-- Configure the top-level `parserOptions` property like this:
+#### **Form Modes**
+- `onSubmit` (default): validation occurs when the form is submitted.
+- `onChange`: triggered after a `trigger` call and validates on every input change.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+#### **Returned State (`formState`)**
+- `errors` — an object containing form errors.
+- `isSubmitted` — a flag indicating if the form has been submitted.
+- `isSubmitting` — a flag indicating if the form is in the process of being submitted.
+- `isValid` — a flag indicating if the form is valid.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+---
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+### 🔄 `useFieldArray` Hook
+- Designed for managing **dynamic forms**.
+- Returns:
+  - `fields` — an array of fields with unique and stable `id`s to be used as keys for React components.
+  - Functions:
+    - `append` — adds a new field to the end of the array.
+    - `prepend` — adds a new field to the start of the array.
+    - `insert` — inserts a field at a specific index.
+    - `remove` — removes a field at a specific index.
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+---
+
+## 🚀 Features at a Glance
+
+- Supports **controlled and uncontrolled forms**.
+- Reactive validation based on **form modes**.
+- Fully compatible with UI libraries (example provided with **shadcn-ui**).
+- Lightweight structure for seamless project integration.
