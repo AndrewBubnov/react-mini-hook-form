@@ -68,7 +68,7 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 			};
 			return {
 				field: {
-					value: formStore.data[fieldName] || '',
+					value: formStore.base[fieldName] || '',
 					onChange: (value: string) => {
 						formStore.updateField(fieldName, value);
 						setFormValue(prevState => ({ ...prevState, [fieldName]: value }));

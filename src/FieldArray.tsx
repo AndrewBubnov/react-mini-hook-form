@@ -11,7 +11,7 @@ export const FieldArray = () => {
 		},
 	});
 
-	const { fields, append, remove, prepend } = useFieldArray({ control, name: 'test' });
+	const { fields, append, remove, prepend, insert } = useFieldArray({ control, name: 'test' });
 	return (
 		<div className="flex flex-col gap-5">
 			<div className="flex gap-[300px]">
@@ -21,6 +21,9 @@ export const FieldArray = () => {
 			<form className="flex flex-col gap-4 pt-5">
 				{fields.map(({ id }, index) => (
 					<div className="flex gap-5 items-end" key={id}>
+						<Button type="button" onClick={insert.bind(null, index)}>
+							Insert new
+						</Button>
 						<Label className="flex flex-col gap-1">
 							<span>First name</span>
 							<Controller
@@ -54,7 +57,7 @@ export const FieldArray = () => {
 								)}
 							/>
 						</Label>
-						<Button onClick={() => remove(index)} type="button">
+						<Button onClick={remove.bind(null, index)} type="button">
 							Delete
 						</Button>
 					</div>

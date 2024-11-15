@@ -1,5 +1,5 @@
 import { DefaultValues, FormState, ObjectType, ResetValues, Subscribers } from './types.ts';
-import { normalizeDefaultValues } from './utils.ts';
+import { map2DArrayToObject, mapObjectTo2DArrayWithMetadata, normalizeDefaultValues } from './utils.ts';
 
 export class FormStore {
 	subscribers: Subscribers;
@@ -64,93 +64,28 @@ export class FormStore {
 		this.setDefaultFieldValue(fieldName);
 	}
 
-	getFieldsArrayLength(fieldName: string) {
-		return new Set(
-			Object.keys(this.data)
-				.filter(key => fieldName === key.split('.')[0])
-				.map(key => key.split('.').at(-1))
-		).size;
-	}
-
 	updateField = (fieldName: string, fieldValue: string) => {
+		this.base[fieldName] = fieldValue;
 		this.data[fieldName] = fieldValue;
 	};
 
 	removeFormFields(index: number, arrayName: string) {
-		const length = this.getFieldsArrayLength(arrayName);
-
-		const fieldsToDelete = Object.keys(this.base).filter(key => {
-			const fieldsList = key.split('.');
-			const [firstField] = fieldsList;
-			const lastField = fieldsList.at(-1);
-			return firstField === arrayName && lastField === String(index);
-		});
-
-		if (!fieldsToDelete.length) return;
-
-		fieldsToDelete.forEach(field => {
-			delete this.base[field];
-		});
-
-		const deletedFieldsBaseList = fieldsToDelete.map(el => {
-			const fieldsList = el.split('.');
-			return fieldsList.slice(0, fieldsList.length - 1).join('.');
-		});
-
-		const indexArray = Array.from({ length: length - index - 1 }, (_, localIndex) => index + 1 + localIndex);
-		indexArray.forEach(arrayIndex => {
-			const fieldsToReplace = Object.keys(this.base).filter(key => {
-				const fieldsList = key.split('.');
-				const lastField: string = fieldsList.at(-1) || '';
-				return (
-					deletedFieldsBaseList.includes(fieldsList.slice(0, fieldsList.length - 1).join('.')) &&
-					arrayIndex === +lastField
-				);
-			});
-			fieldsToReplace.forEach(field => {
-				const currentValue = this.data[field];
-				const fieldArray = field.split('.');
-				const updatedFieldBase = fieldArray.slice(0, fieldArray.length - 1).join('.');
-				this.updateField(`${updatedFieldBase}.${arrayIndex - 1}`, currentValue);
-				delete this.base[field];
-			});
-		});
+		const { array, baseString, optionalStrings } = mapObjectTo2DArrayWithMetadata(this.base, arrayName);
+		this.base = map2DArrayToObject(
+			array.filter((_, elIndex) => index !== elIndex),
+			baseString,
+			optionalStrings
+		);
 	}
 
-	shiftFields = (arrayName: string) => {
-		const length = this.getFieldsArrayLength(arrayName);
-
-		const prependedFieldsBases = Object.keys(this.base)
-			.filter(key => {
-				const fieldsList = key.split('.');
-				const [firstField] = fieldsList;
-				const lastField = fieldsList.at(-1);
-				return firstField === arrayName && lastField === '0';
-			})
-			.map(el => {
-				const fieldsList = el.split('.');
-				return fieldsList.slice(0, fieldsList.length - 1).join('.');
-			});
-
-		const indexArray = Array.from({ length }, (_, index) => index);
-
-		indexArray.forEach(arrayIndex => {
-			const fieldsToReplace = Object.keys(this.base).filter(key => {
-				const fieldsList = key.split('.');
-				const lastField: string = fieldsList.at(-1) || '';
-				return (
-					prependedFieldsBases.includes(fieldsList.slice(0, fieldsList.length - 1).join('.')) &&
-					arrayIndex === +lastField
-				);
-			});
-			fieldsToReplace.forEach(fieldName => {
-				const currentValue = this.data[fieldName];
-				const fieldArray = fieldName.split('.');
-				const updatedFieldBase = fieldArray.slice(0, fieldArray.length - 1).join('.');
-				this.updateField(`${updatedFieldBase}.${arrayIndex + 1}`, currentValue);
-				this.setDefaultFieldValue(fieldName);
-			});
-		});
+	shiftFields = (arrayName: string, index = 0) => {
+		const { array, baseString, optionalStrings } = mapObjectTo2DArrayWithMetadata(this.base, arrayName);
+		const additional = Array.from(
+			{ length: optionalStrings.length },
+			(_, index) => this.defaultValues[`${baseString}.${optionalStrings[index]}`] || ''
+		);
+		const updatedArray = [...array.slice(0, index + 1), additional, ...array.slice(index + 1)];
+		this.base = map2DArrayToObject(updatedArray, baseString, optionalStrings);
 	};
 
 	reset(resetValues: ResetValues) {

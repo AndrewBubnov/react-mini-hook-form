@@ -34,3 +34,36 @@ export const normalizeDefaultValues = (defaultValues: DefaultValues): Record<str
 		return acc;
 	}, {} as ObjectType);
 };
+
+export const mapObjectTo2DArrayWithMetadata = (input: ObjectType, name: string) => {
+	const result: string[][] = [];
+	let baseString: string = '';
+	const optionalStrings = new Set<string>();
+
+	Object.entries(input)
+		.filter(([key]) => key.split('.')[0] === name)
+		.forEach(([key, value]) => {
+			const parts = key.split('.');
+			baseString = parts[0];
+
+			const indexArray = Array.from({ length: parts.length - 2 }, (_, index) => index + 1);
+			indexArray.forEach(index => optionalStrings.add(parts[index]));
+
+			const rowIndex = Number(parts.at(-1));
+			if (!result[rowIndex]) {
+				result[rowIndex] = [];
+			}
+			result[rowIndex].push(value);
+		});
+	return { baseString, optionalStrings: [...optionalStrings], array: result };
+};
+
+export const map2DArrayToObject = (array: string[][], baseString: string, optionalStrings: string[]) => {
+	return array.reduce((result, row, rowIndex) => {
+		row.forEach((value, columnIndex) => {
+			const optional = optionalStrings.length ? `${optionalStrings[columnIndex]}.` : '';
+			result[`${baseString}.${optional}${rowIndex}`] = value;
+		});
+		return result;
+	}, {} as ObjectType);
+};

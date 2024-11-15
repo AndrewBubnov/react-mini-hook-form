@@ -8,7 +8,7 @@ type Control = (
 ) => {
 	field: { value: string; onChange: (value: string) => void };
 	removeField(index: number, fieldName: string): void;
-	shiftFields(name: string): void;
+	shiftFields(name: string, index?: number): void;
 	defaultValue?: ObjectType | string;
 };
 
@@ -20,30 +20,32 @@ type UseFieldArray = {
 export const useFieldArray = ({ control, name }: UseFieldArray) => {
 	const { defaultValue, removeField, shiftFields } = control(name, true);
 
-	const defaultLength = defaultValue && Object.keys(defaultValue).length ? 1 : 0;
-	const [listLength, setListLength] = useState(defaultLength);
-
-	const fields = useMemo(
-		() =>
-			Array.from({ length: listLength }, () => {
-				const id = nanoid();
-				return { id };
-			}),
-		[listLength]
+	const [fields, setFields] = useState<{ id: string }[]>(
+		defaultValue && Object.keys(defaultValue).length ? [{ id: nanoid() }] : []
 	);
 
-	const append = useCallback(() => setListLength(prevLength => prevLength + 1), []);
+	const append = useCallback(() => setFields(prevState => [...prevState, { id: nanoid() }]), []);
+
 	const remove = useCallback(
 		(index: number) => {
 			removeField(index, name);
-			setListLength(prevLength => prevLength - 1);
+			setFields(prevState => prevState.filter((_, elIndex) => index !== elIndex));
 		},
 		[name, removeField]
 	);
-	const prepend = useCallback(() => {
-		append();
-		shiftFields(name);
-	}, [append, name, shiftFields]);
 
-	return useMemo(() => ({ fields, append, remove, prepend }), [append, fields, prepend, remove]);
+	const prepend = useCallback(() => {
+		setFields(prevState => [{ id: nanoid() }, ...prevState]);
+		shiftFields(name);
+	}, [name, shiftFields]);
+
+	const insert = useCallback(
+		(index: number) => {
+			setFields(prevState => [...prevState.slice(0, index + 1), { id: nanoid() }, ...prevState.slice(index + 1)]);
+			shiftFields(name, index);
+		},
+		[name, shiftFields]
+	);
+
+	return useMemo(() => ({ fields, append, remove, prepend, insert }), [append, fields, insert, prepend, remove]);
 };
