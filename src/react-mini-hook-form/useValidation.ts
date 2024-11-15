@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Errors, FieldValidationOptions, FormState, UseFormProps } from './types.ts';
+import { Errors, FieldValidationOptions, FormState, UseForm } from './types.ts';
 import { registerValidation } from './utils.ts';
 
-export const useValidation = (state: FormState, resolver: UseFormProps['resolver']) => {
+export const useValidation = (state: FormState, resolver: UseForm['resolver']) => {
 	const [errors, setErrors] = useState<Errors>({});
 	const [isTriggered, setIsTriggered] = useState<boolean>(false);
 

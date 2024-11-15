@@ -1,11 +1,11 @@
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormStore } from './FormStore.ts';
-import { FieldValidationOptions, FormState, Mode, ResetValues, SubmitHandler, UseFormProps } from './types.ts';
+import { FieldValidationOptions, FormState, Mode, ResetValues, SubmitHandler, UseForm } from './types.ts';
 import { useValidation } from './useValidation.ts';
 import { useWatchList } from './useWatchList.ts';
 import { useLatest } from './useLatest.ts';
 
-const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormProps = {}) => {
+const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm = {}) => {
 	const formStore = useMemo(() => new FormStore(defaultValues), [defaultValues]);
 
 	const [validationMode, setValidationMode] = useState<Mode>(mode);
@@ -158,11 +158,11 @@ const useFormMemo = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormPro
 	);
 };
 
-export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseFormProps = {}) => {
+export const useForm = ({ resolver, defaultValues, mode = Mode.Submit }: UseForm = {}) => {
 	const defaultValuesRef = useRef(defaultValues);
 
-	const resolverRef = useRef<UseFormProps['resolver']>(resolver);
-	const modeRef = useRef<UseFormProps['mode']>(mode);
+	const resolverRef = useRef<UseForm['resolver']>(resolver);
+	const modeRef = useRef<UseForm['mode']>(mode);
 
 	return useFormMemo({
 		resolver: resolverRef.current,

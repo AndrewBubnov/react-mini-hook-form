@@ -1,28 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import { nanoid } from 'nanoid';
-import { ObjectType } from './types.ts';
-
-type Control = (
-	fieldName: string,
-	isArrayRegistered?: boolean
-) => {
-	field: { value: string; onChange: (value: string) => void };
-	removeField(index: number, fieldName: string): void;
-	shiftFields(name: string, index?: number): void;
-	defaultValue?: ObjectType | string;
-};
-
-type UseFieldArray = {
-	control: Control;
-	name: string;
-};
+import { UseFieldArray } from './types.ts';
+import { getInitialFields } from './utils.ts';
 
 export const useFieldArray = ({ control, name }: UseFieldArray) => {
 	const { defaultValue, removeField, shiftFields } = control(name, true);
 
-	const [fields, setFields] = useState<{ id: string }[]>(
-		defaultValue && Object.keys(defaultValue).length ? [{ id: nanoid() }] : []
-	);
+	const [fields, setFields] = useState<{ id: string }[]>(getInitialFields(defaultValue));
 
 	const append = useCallback(() => setFields(prevState => [...prevState, { id: nanoid() }]), []);
 

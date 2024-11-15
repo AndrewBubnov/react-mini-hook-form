@@ -1,5 +1,6 @@
 import { DefaultValues, Errors, FieldValidationOptions, FormState, ObjectType, ValidationRules } from './types.ts';
 import { REQUIRED_FIELD_DEFAULT_MESSAGE } from './constants.ts';
+import { nanoid } from 'nanoid';
 
 export const registerValidation =
 	(validationMap: Record<string, FieldValidationOptions>, state: FormState) => (acc: Errors, cur: string) => {
@@ -67,3 +68,6 @@ export const map2DArrayToObject = (array: string[][], baseString: string, option
 		return result;
 	}, {} as ObjectType);
 };
+
+export const getInitialFields = (defaultValue?: string | ObjectType) =>
+	defaultValue && Object.keys(defaultValue).length ? [{ id: nanoid() }] : [];
