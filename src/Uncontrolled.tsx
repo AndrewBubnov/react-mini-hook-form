@@ -1,6 +1,7 @@
 import { useForm } from './react-mini-hook-form';
 import { FormState } from './react-mini-hook-form/types.ts';
 import { Button } from './components/ui/button.tsx';
+import { Label } from './components/ui/label.tsx';
 
 export const Uncontrolled = () => {
 	const {
@@ -23,7 +24,7 @@ export const Uncontrolled = () => {
 
 	return (
 		<form className="flex flex-col gap-4 p-5" onSubmit={handleSubmit(submitHandler)}>
-			<label className="font-semibold">
+			<Label className="flex flex-col gap-1">
 				<p>Title</p>
 				<input
 					className="border border-gray-700 rounded p-1 h-10"
@@ -37,8 +38,8 @@ export const Uncontrolled = () => {
 						{errors.title?.message}
 					</p>
 				)}
-			</label>
-			<label className="font-semibold">
+			</Label>
+			<Label className="flex flex-col gap-1">
 				<p>Body</p>
 				<input
 					className="border border-gray-700 rounded p-1 h-10"
@@ -52,7 +53,7 @@ export const Uncontrolled = () => {
 						{errors.body?.message}
 					</p>
 				)}
-			</label>
+			</Label>
 			<Button type="button" onClick={() => reset({ title: 'title', body: 'Body' })}>
 				Reset
 			</Button>

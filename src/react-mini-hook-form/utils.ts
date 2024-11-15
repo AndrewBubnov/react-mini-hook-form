@@ -1,4 +1,4 @@
-import { Errors, FieldValidationOptions, FormState, ValidationRules } from './types.ts';
+import { DefaultValues, Errors, FieldValidationOptions, FormState, ObjectType, ValidationRules } from './types.ts';
 import { REQUIRED_FIELD_DEFAULT_MESSAGE } from './constants.ts';
 
 export const registerValidation =
@@ -19,3 +19,51 @@ export const registerValidation =
 		}
 		return acc;
 	};
+
+export const normalizeDefaultValues = (defaultValues: DefaultValues): Record<string, string> => {
+	if (!defaultValues) return {};
+
+	return Object.entries(defaultValues).reduce((acc, [key, value]) => {
+		if (typeof value === 'object' && value !== null) {
+			Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+				acc[`${key}.${nestedKey}`] = nestedValue;
+			});
+		} else {
+			acc[key] = value as string;
+		}
+		return acc;
+	}, {} as ObjectType);
+};
+
+export const mapObjectTo2DArrayWithMetadata = (input: ObjectType, name: string) => {
+	const result: string[][] = [];
+	let baseString: string = '';
+	const optionalStrings = new Set<string>();
+
+	Object.entries(input)
+		.filter(([key]) => key.split('.')[0] === name)
+		.forEach(([key, value]) => {
+			const parts = key.split('.');
+			baseString = parts[0];
+
+			const indexArray = Array.from({ length: parts.length - 2 }, (_, index) => index + 1);
+			indexArray.forEach(index => optionalStrings.add(parts[index]));
+
+			const rowIndex = Number(parts.at(-1));
+			if (!result[rowIndex]) {
+				result[rowIndex] = [];
+			}
+			result[rowIndex].push(value);
+		});
+	return { baseString, optionalStrings: [...optionalStrings], array: result };
+};
+
+export const map2DArrayToObject = (array: string[][], baseString: string, optionalStrings: string[]) => {
+	return array.reduce((result, row, rowIndex) => {
+		row.forEach((value, columnIndex) => {
+			const optional = optionalStrings.length ? `${optionalStrings[columnIndex]}.` : '';
+			result[`${baseString}.${optional}${rowIndex}`] = value;
+		});
+		return result;
+	}, {} as ObjectType);
+};

@@ -1,13 +1,14 @@
-import { DefaultValues, FormState, ResetValues, Subscribers } from './types.ts';
+import { DefaultValues, FormState, ObjectType, ResetValues, Subscribers } from './types.ts';
+import { map2DArrayToObject, mapObjectTo2DArrayWithMetadata, normalizeDefaultValues } from './utils.ts';
 
 export class FormStore {
 	subscribers: Subscribers;
 	base: FormState;
 	data: FormState;
-	defaultValues: DefaultValues;
+	defaultValues: ObjectType;
 
 	constructor(defaultValues?: DefaultValues) {
-		this.defaultValues = defaultValues;
+		this.defaultValues = normalizeDefaultValues(defaultValues);
 		this.subscribers = {};
 		this.base = {};
 		this.data = this.createProxy(this.base);
@@ -47,30 +48,45 @@ export class FormStore {
 		return Object.keys(this.base);
 	}
 
-	registerField(fieldName: string, isArrayRegistered?: boolean) {
-		if (fieldName in this.base || isArrayRegistered) return;
-		this.base[fieldName] = this.defaultValues?.[fieldName] || '';
+	setDefaultFieldValue(fieldName: string) {
+		const fieldList = fieldName.split('.');
+		const dataFields = fieldList.slice(0, fieldList.length - 1);
+
+		if (!dataFields.length) {
+			this.base[fieldName] = this.defaultValues?.[fieldName] || '';
+			return;
+		}
+		this.base[fieldName] = this.defaultValues?.[dataFields.join('.')] || '';
 	}
 
-	getFieldsArrayLength(fieldName: string) {
-		return Object.keys(this.data).filter(el => el.split('.')[0] === fieldName.split('.')[0]).length;
+	registerField(fieldName: string, isArrayRegistered?: boolean) {
+		if (fieldName in this.base || isArrayRegistered) return;
+		this.setDefaultFieldValue(fieldName);
 	}
 
 	updateField = (fieldName: string, fieldValue: string) => {
+		this.base[fieldName] = fieldValue;
 		this.data[fieldName] = fieldValue;
 	};
 
-	removeFieldFromArray(index: number, arrayName: string) {
-		const length = this.getFieldsArrayLength(arrayName);
-		delete this.base[`${arrayName}.${index}`];
-
-		const indexArray = Array.from({ length: length - index - 1 }, (_, localIndex) => index + 1 + localIndex);
-		indexArray.forEach(arrayIndex => {
-			const currentValue = this.data[`${arrayName}.${arrayIndex}`];
-			this.updateField(`${arrayName}.${arrayIndex - 1}`, currentValue);
-			delete this.base[`${arrayName}.${arrayIndex}`];
-		});
+	removeFormFields(index: number, arrayName: string) {
+		const { array, baseString, optionalStrings } = mapObjectTo2DArrayWithMetadata(this.base, arrayName);
+		this.base = map2DArrayToObject(
+			array.filter((_, elIndex) => index !== elIndex),
+			baseString,
+			optionalStrings
+		);
 	}
+
+	shiftFields = (arrayName: string, index = 0) => {
+		const { array, baseString, optionalStrings } = mapObjectTo2DArrayWithMetadata(this.base, arrayName);
+		const additional = Array.from(
+			{ length: optionalStrings.length },
+			(_, index) => this.defaultValues[`${baseString}.${optionalStrings[index]}`] || ''
+		);
+		const updatedArray = [...array.slice(0, index + 1), additional, ...array.slice(index + 1)];
+		this.base = map2DArrayToObject(updatedArray, baseString, optionalStrings);
+	};
 
 	reset(resetValues: ResetValues) {
 		const resetKeys = resetValues ? Object.keys(resetValues) : this.getFields();

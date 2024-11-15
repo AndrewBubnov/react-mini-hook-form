@@ -4,6 +4,7 @@ import { FormState } from './react-mini-hook-form/types.ts';
 import { Button } from './components/ui/button.tsx';
 import { Input } from './components/ui/input.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select.tsx';
+import { Label } from './components/ui/label.tsx';
 
 export const Controlled = () => {
 	const {
@@ -20,7 +21,7 @@ export const Controlled = () => {
 
 	return (
 		<form className="flex flex-col gap-4 p-5" onSubmit={handleSubmit(submitHandler)}>
-			<label className="font-semibold">
+			<Label className="flex flex-col gap-1">
 				<p>Input</p>
 				<Controller
 					className="border border-gray-700 rounded p-1"
@@ -28,7 +29,7 @@ export const Controlled = () => {
 					control={control}
 					render={({ field }) => <Input {...field} onChange={evt => field.onChange(evt.target.value)} />}
 				/>
-			</label>
+			</Label>
 			{errors.input && (
 				<span role="alert" className="text-red-500">
 					{errors.input?.message}
