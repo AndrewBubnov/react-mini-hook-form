@@ -1,6 +1,5 @@
-import { Controller, useForm } from './react-mini-hook-form';
+import { Controller, useFieldArray, useForm } from './react-mini-hook-form';
 import { Input } from './components/ui/input.tsx';
-import { useFieldArray } from './react-mini-hook-form/useFieldArray.ts';
 import { Button } from './components/ui/button.tsx';
 import { Label } from './components/ui/label.tsx';
 
